@@ -10,7 +10,7 @@
 - Linux (Ubuntu 18.04+, CentOS 7+)
 
 ### Python版本
-- Python 3.8 或更高版本
+- Python 3.9 或更高版本
 - 推荐使用 Python 3.9 或 3.10
 
 ### 硬件要求

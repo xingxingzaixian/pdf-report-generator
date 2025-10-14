@@ -26,6 +26,35 @@
 
 ### 安装
 
+#### 方式 1: 通过 pip 安装（推荐）
+
+```bash
+# 基础安装（仅核心 PDF 生成功能）
+pip install pdf-report-generator
+
+# 安装包含 API 服务器支持
+pip install pdf-report-generator[api]
+
+# 安装所有功能
+pip install pdf-report-generator[all]
+```
+
+#### 方式 2: 从源码安装（开发环境）
+
+```bash
+# 克隆项目
+git clone <repository-url>
+cd pdf-report
+
+# 开发模式安装
+pip install -e .
+
+# 或安装包含 API 支持
+pip install -e .[api]
+```
+
+#### 方式 3: 直接使用源码
+
 ```bash
 # 克隆项目
 git clone <repository-url>
@@ -33,10 +62,9 @@ cd pdf-report
 
 # 安装依赖
 pip install -r requirements.txt
-
-# 或者安装为包（推荐）
-pip install -e .
 ```
+
+> 📖 详细安装说明请查看 [INSTALLATION.md](INSTALLATION.md)
 
 ### 方式1: Python库使用
 
@@ -80,11 +108,33 @@ pdf_bytes = generator.to_bytes()  # 获取字节流
 
 #### 启动服务
 
+**使用库安装后（推荐）：**
+
+```python
+# 方式1: Python 代码启动
+from pdf_generator import start_api_server
+
+start_api_server(host="localhost", port=8080)
+```
+
 ```bash
-# 方式1: 直接运行
+# 方式2: 命令行启动
+pdf-report-api --host localhost --port 8080
+
+# 开发模式（热重载）
+pdf-report-api --reload
+
+# 生产模式（多进程）
+pdf-report-api --workers 4
+```
+
+**或使用传统方式：**
+
+```bash
+# 直接运行
 python -m api.main
 
-# 方式2: 使用uvicorn
+# 使用 uvicorn
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
