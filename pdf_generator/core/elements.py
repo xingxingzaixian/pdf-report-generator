@@ -102,13 +102,35 @@ class ElementFactory:
             - columnWidths: 列宽列表
             - mergedCells: 合并单元格配置，格式：[[startRow, startCol, endRow, endCol], ...]
             - rowHeights: 行高列表（可选）
+            - wrapColumns: 需要自动换行的列索引列表（可选）
+            - wrapThreshold: 自动换行的字符长度阈值（默认50）
         """
         # 获取表格数据
         table_data = None
         
+        # 获取自动换行配置
+        wrap_columns = config.get('wrapColumns', [])  # 指定需要换行的列索引
+        wrap_threshold = config.get('wrapThreshold', 50)  # 超过此长度自动换行
+        
+        # 创建单元格样式（用于Paragraph）
+        cell_style = self.style_manager.get_style('BodyText')
+        
         # 方式1: 直接提供数据
         if 'data' in config:
-            table_data = config['data']
+            raw_data = config['data']
+            # 处理表头（第一行）
+            table_data = [raw_data[0]]
+            # 处理数据行，应用自动换行
+            for row in raw_data[1:]:
+                row_data = []
+                for col_idx, val in enumerate(row):
+                    val_str = str(val)
+                    # 判断是否需要自动换行
+                    if col_idx in wrap_columns or len(val_str) > wrap_threshold:
+                        row_data.append(Paragraph(val_str, cell_style))
+                    else:
+                        row_data.append(val_str)
+                table_data.append(row_data)
         # 方式2: 从数据源获取
         elif 'dataSource' in config:
             data_source_name = config['dataSource']
@@ -128,7 +150,18 @@ class ElementFactory:
             
             # 添加数据行
             for _, row in df.iterrows():
-                table_data.append([str(val) for val in row.values])
+                row_data = []
+                for col_idx, val in enumerate(row.values):
+                    val_str = str(val)
+                    # 判断是否需要自动换行
+                    # 1. 在wrapColumns列表中
+                    # 2. 超过wrapThreshold长度阈值
+                    if col_idx in wrap_columns or len(val_str) > wrap_threshold:
+                        # 使用Paragraph实现自动换行
+                        row_data.append(Paragraph(val_str, cell_style))
+                    else:
+                        row_data.append(val_str)
+                table_data.append(row_data)
         else:
             raise ValueError("Table element requires either 'dataSource' or 'data'")
         
