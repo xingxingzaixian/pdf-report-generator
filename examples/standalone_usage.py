@@ -20,8 +20,8 @@ def example1_from_config():
     print("示例1: 从配置文件生成PDF")
     
     generator = PDFReportGenerator(config_path="templates/sales_report.json")
-    generator.save("output_sales_report.pdf")
-    print("✓ 生成成功: output_sales_report.pdf\n")
+    generator.save("examples/output_sales_report.pdf")
+    print("✓ 生成成功: examples/output_sales_report.pdf\n")
 
 
 # 示例2: 使用字典配置生成PDF
@@ -67,8 +67,8 @@ def example2_from_dict():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("output_simple_report.pdf")
-    print("✓ 生成成功: output_simple_report.pdf\n")
+    generator.save("examples/output_simple_report.pdf")
+    print("✓ 生成成功: examples/output_simple_report.pdf\n")
 
 
 # 示例3: 动态添加数据源
@@ -137,8 +137,8 @@ def example3_dynamic_data():
     
     generator = PDFReportGenerator(config_dict=config)
     generator.add_data_source("sales", sales_data)
-    generator.save("output_dynamic_data.pdf")
-    print("✓ 生成成功: output_dynamic_data.pdf\n")
+    generator.save("examples/output_dynamic_data.pdf")
+    print("✓ 生成成功: examples/output_dynamic_data.pdf\n")
 
 
 # 示例4: 图片元素示例
@@ -148,7 +148,7 @@ def example4_image():
     
     # 首先创建demo.png图片（如果不存在）
     import os
-    if not os.path.exists("demo.png"):
+    if not os.path.exists("examples/demo.png"):
         try:
             from PIL import Image, ImageDraw, ImageFont
             img = Image.new('RGB', (400, 200), color='#3498DB')
@@ -160,7 +160,7 @@ def example4_image():
                 font = ImageFont.load_default()
             draw.text((200, 80), "PDF Generator", fill='white', anchor="mm", font=font)
             draw.text((200, 120), "Demo Image", fill='white', anchor="mm", font=font)
-            img.save('demo.png')
+            img.save('examples/demo.png')
             print("  ✓ 创建demo.png图片")
         except Exception as e:
             print(f"  ⚠ 无法创建demo.png: {e}")
@@ -213,7 +213,7 @@ def example4_image():
             },
             {
                 "type": "image",
-                "path": "demo.png",
+                "path": "examples/demo.png",
                 "width": 550,
                 "height": 225,
                 "alignment": "center",
@@ -239,7 +239,7 @@ def example4_image():
             },
             {
                 "type": "image",
-                "path": "demo.png",
+                "path": "examples/demo.png",
                 "width": 200,
                 "height": 100,
                 "alignment": "left",
@@ -265,7 +265,7 @@ def example4_image():
             },
             {
                 "type": "image",
-                "path": "demo.png",
+                "path": "examples/demo.png",
                 "width": 150,
                 "height": 75,
                 "alignment": "right",
@@ -275,8 +275,8 @@ def example4_image():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("output_image_demo.pdf")
-    print("✓ 生成成功: output_image_demo.pdf\n")
+    generator.save("examples/output_image_demo.pdf")
+    print("✓ 生成成功: examples/output_image_demo.pdf\n")
 
 
 # 示例5: 复杂报告（多种元素类型）
@@ -335,8 +335,8 @@ def example5_complex():
     
     generator = PDFReportGenerator(config_dict=config)
     generator.add_data_source("finance", data)
-    generator.save("output_complex_report.pdf")
-    print("✓ 生成成功: output_complex_report.pdf\n")
+    generator.save("examples/output_complex_report.pdf")
+    print("✓ 生成成功: examples/output_complex_report.pdf\n")
 
 
 if __name__ == "__main__":
