@@ -36,7 +36,8 @@ class PDFReportGenerator:
     def __init__(
         self,
         config_path: Optional[str] = None,
-        config_dict: Optional[Dict[str, Any]] = None
+        config_dict: Optional[Dict[str, Any]] = None,
+        font_dirs: Optional[list] = None
     ):
         """
         初始化PDF生成器
@@ -44,12 +45,31 @@ class PDFReportGenerator:
         Args:
             config_path: JSON配置文件路径
             config_dict: 配置字典（直接传入）
+            font_dirs: 字体文件目录列表，用于查找中文字体
+                      示例: ['/path/to/fonts', 'C:\\Windows\\Fonts']
+                      如果不提供，会自动在以下位置查找：
+                      1. 当前工作目录下的 fonts 目录
+                      2. 用户主目录下的 .fonts 或 fonts 目录
         """
         # 解析配置
         self.config_parser = ConfigParser(config_path, config_dict)
         
+        # 从配置中获取字体目录（如果有的话）
+        metadata = self.config_parser.get_metadata()
+        config_font_dirs = metadata.get('fontDirs') if metadata else None
+        
+        # 合并字体目录：参数优先，然后是配置文件
+        all_font_dirs = []
+        if font_dirs:
+            all_font_dirs.extend(font_dirs)
+        if config_font_dirs:
+            if isinstance(config_font_dirs, str):
+                all_font_dirs.append(config_font_dirs)
+            elif isinstance(config_font_dirs, list):
+                all_font_dirs.extend(config_font_dirs)
+        
         # 初始化组件
-        self.style_manager = StyleManager()
+        self.style_manager = StyleManager(font_dirs=all_font_dirs if all_font_dirs else None)
         self.element_factory = ElementFactory(self.style_manager)
         
         # 数据源

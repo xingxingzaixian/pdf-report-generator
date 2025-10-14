@@ -112,7 +112,7 @@ app.add_middleware(
 ## 更多帮助
 
 - [故障排查](../06-development/troubleshooting.md)
-- [GitHub Issues](https://github.com/your-org/pdf-report/issues)
+- [GitHub Issues](https://github.com/xingxingzaixian/pdf-report-generator/issues)
 
 ---
 

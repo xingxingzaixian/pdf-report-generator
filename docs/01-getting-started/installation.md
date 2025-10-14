@@ -25,7 +25,7 @@
 
 ```bash
 # 使用 Git 克隆项目
-git clone https://github.com/your-org/pdf-report-generator.git
+git clone https://github.com/xingxingzaixian/pdf-report-generator.git
 cd pdf-report-generator
 ```
 
@@ -277,10 +277,32 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ### 问题2：中文显示为方框
 
+**原因**：PDF Report Generator 不包含字体文件，需要用户自己提供中文字体。
+
 **解决方案**：
-- 确保 `fonts/` 目录包含中文字体文件
-- 检查字体文件权限
-- 参考 [中文字体配置](#中文字体配置) 部分
+
+1. **快速解决**（推荐）：
+   ```bash
+   # 在项目目录创建 fonts 文件夹
+   mkdir fonts
+   
+   # 将中文字体文件放入 fonts/ 目录
+   # Windows: 从 C:\Windows\Fonts\ 复制 SimHei.ttf 和 SimSun.ttf
+   # Linux: 安装字体包 sudo apt-get install fonts-wqy-microhei
+   ```
+
+2. **使用系统字体**：
+   ```python
+   from pdf_generator import PDFReportGenerator
+   
+   generator = PDFReportGenerator(
+       config_dict=config,
+       font_dirs=['C:\\Windows\\Fonts']  # Windows
+       # font_dirs=['/usr/share/fonts']  # Linux
+   )
+   ```
+
+3. **详细配置**：参考 [中文字体配置](../03-advanced-features/chinese-fonts.md)
 
 ### 问题3：matplotlib中文显示异常
 
@@ -300,6 +322,82 @@ rm -rf ~/.matplotlib
 - 重新安装依赖：`pip install -r requirements.txt`
 - 检查Python版本是否符合要求
 
+## 中文字体配置
+
+### 重要说明
+
+**PDF Report Generator 不包含字体文件**，需要用户自己提供中文字体。这样设计的原因：
+- 字体文件较大（每个 5-20 MB），避免增加包体积
+- 不同用户可能需要不同的字体
+- 避免字体许可证问题
+- 可以使用系统已有的字体
+
+### 快速配置
+
+**方式 1：使用项目目录（推荐）**
+
+```bash
+# 在项目根目录创建 fonts 文件夹
+mkdir fonts
+
+# 将中文字体文件放入该文件夹
+# Windows: 从 C:\Windows\Fonts\ 复制 SimHei.ttf 和 SimSun.ttf
+# Linux: 安装字体包
+sudo apt-get install fonts-wqy-microhei fonts-wqy-zenhei
+```
+
+代码中无需特殊配置：
+
+```python
+from pdf_generator import PDFReportGenerator
+
+# 会自动查找当前目录下的 fonts/
+generator = PDFReportGenerator(config_dict=config)
+generator.generate('output.pdf')
+```
+
+**方式 2：指定字体目录**
+
+```python
+from pdf_generator import PDFReportGenerator
+
+generator = PDFReportGenerator(
+    config_dict=config,
+    font_dirs=[
+        './fonts',                    # 当前目录
+        'C:\\Windows\\Fonts',         # Windows 系统字体
+        '/usr/share/fonts/chinese',   # Linux 中文字体
+    ]
+)
+```
+
+**方式 3：配置文件指定**
+
+```json
+{
+  "metadata": {
+    "title": "报告",
+    "fontDirs": ["./fonts", "C:\\Windows\\Fonts"]
+  }
+}
+```
+
+### 验证字体配置
+
+```python
+from pdf_generator import PDFReportGenerator
+
+generator = PDFReportGenerator(config_dict=config)
+print("已注册字体：", generator.style_manager.registered_fonts)
+# 输出示例：{'SimHei', 'SimSun'}
+```
+
+### 详细说明
+
+完整的中文字体配置指南请参考：
+- [中文字体配置](../03-advanced-features/chinese-fonts.md) - 详细配置说明
+- [字体配置指南](../../FONT_CONFIGURATION.md) - 根目录完整指南
+
 ## 下一步
 
 安装完成后，建议按以下顺序学习：
@@ -307,6 +405,7 @@ rm -rf ~/.matplotlib
 1. **[快速开始](./quick-start.md)** - 5分钟生成第一个PDF
 2. **[创建第一个完整报告](./first-report.md)** - 分步教程
 3. **[基本概念](../02-user-guide/basic-concepts.md)** - 理解核心概念
+4. **[中文字体配置](../03-advanced-features/chinese-fonts.md)** - 字体配置详解
 
 ## 获取帮助
 

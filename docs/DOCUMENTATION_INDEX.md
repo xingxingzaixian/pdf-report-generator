@@ -31,7 +31,7 @@ PDF报告生成器完整文档已创建。
 - [x] table-of-contents.md - 自动目录
 - [x] cover-pages.md - 封面设计
 - [x] table-merging.md - 表格合并
-- [x] chinese-fonts.md - 中文字体
+- [x] **chinese-fonts.md** - 中文字体配置 ⭐ **重要**
 - [x] images-handling.md - 图片处理
 - [x] page-numbers.md - 页码格式
 - [x] bookmarks-links.md - 书签和链接
@@ -51,9 +51,10 @@ PDF报告生成器完整文档已创建。
 ### 新用户入门路径
 
 1. **安装** → [installation.md](./01-getting-started/installation.md)
-2. **快速开始** → [quick-start.md](./01-getting-started/quick-start.md)
-3. **完整报告** → [first-report.md](./01-getting-started/first-report.md)
-4. **基本概念** → [basic-concepts.md](./02-user-guide/basic-concepts.md)
+2. **中文字体配置** → [chinese-fonts.md](./03-advanced-features/chinese-fonts.md) ⭐ **重要**
+3. **快速开始** → [quick-start.md](./01-getting-started/quick-start.md)
+4. **完整报告** → [first-report.md](./01-getting-started/first-report.md)
+5. **基本概念** → [basic-concepts.md](./02-user-guide/basic-concepts.md)
 
 ### 进阶学习路径
 
@@ -72,6 +73,7 @@ PDF报告生成器完整文档已创建。
 ### 按功能查找
 
 - **生成PDF** → quick-start.md
+- **中文字体配置** → chinese-fonts.md ⭐
 - **添加表格** → elements/table.md
 - **添加图表** → elements/chart.md
 - **设置页眉页脚** → headers-footers.md

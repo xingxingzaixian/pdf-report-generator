@@ -14,44 +14,95 @@ from reportlab.pdfbase.ttfonts import TTFont
 class StyleManager:
     """管理PDF文档的样式"""
     
-    def __init__(self):
+    def __init__(self, font_dirs: Optional[list] = None):
+        """
+        初始化样式管理器
+        
+        Args:
+            font_dirs: 字体目录列表，会按顺序查找字体文件
+                      如果不提供，会尝试查找常见位置
+        """
         self.styles = getSampleStyleSheet()
         self.custom_styles: Dict[str, ParagraphStyle] = {}
         self.table_styles: Dict[str, TableStyle] = {}
         self.registered_fonts = set()
         
         # 自动注册中文字体
-        self._register_chinese_fonts()
+        self._register_chinese_fonts(font_dirs)
     
-    def _register_chinese_fonts(self):
-        """自动注册中文字体"""
-        # 获取项目根目录下的fonts文件夹
-        project_root = Path(__file__).parent.parent.parent
-        fonts_dir = project_root / "fonts"
+    def _get_font_search_paths(self, custom_dirs: Optional[list] = None) -> list:
+        """
+        获取字体搜索路径
         
-        if not fonts_dir.exists():
-            print(f"Warning: fonts directory not found at {fonts_dir}")
+        Args:
+            custom_dirs: 用户自定义的字体目录列表
+            
+        Returns:
+            字体搜索路径列表
+        """
+        paths = []
+        
+        # 1. 用户指定的目录（优先级最高）
+        if custom_dirs:
+            for d in custom_dirs:
+                path = Path(d)
+                if path.exists() and path.is_dir():
+                    paths.append(path)
+        
+        # 2. 当前工作目录下的 fonts 目录
+        cwd_fonts = Path.cwd() / "fonts"
+        if cwd_fonts.exists() and cwd_fonts.is_dir():
+            paths.append(cwd_fonts)
+        
+        # 3. 用户主目录下的 .fonts 或 fonts
+        home = Path.home()
+        for font_dir_name in ['.fonts', 'fonts', '.local/share/fonts']:
+            home_fonts = home / font_dir_name
+            if home_fonts.exists() and home_fonts.is_dir():
+                paths.append(home_fonts)
+        
+        return paths
+    
+    def _register_chinese_fonts(self, font_dirs: Optional[list] = None):
+        """
+        自动注册中文字体
+        
+        Args:
+            font_dirs: 字体目录列表
+        """
+        # 获取字体搜索路径
+        search_paths = self._get_font_search_paths(font_dirs)
+        
+        if not search_paths:
+            # print("Info: No font directories found. Using system default fonts.")
             return
         
         # 定义字体映射
         font_mappings = {
-            'SimSun': ['SimSun.ttf', 'SimSun.TTF', 'simsun.ttf'],
-            'SimHei': ['SimHei.ttf', 'SimHei.TTF', 'simhei.ttf'],
+            'SimSun': ['SimSun.ttf', 'SimSun.TTF', 'simsun.ttf', 'simsun.ttc'],
+            'SimHei': ['SimHei.ttf', 'SimHei.TTF', 'simhei.ttf', 'simhei.ttc'],
             'GB2312': ['GB2312.ttf', 'GB2312.TTF', 'gb2312.ttf'],
         }
         
-        # 注册字体
+        # 在所有搜索路径中查找并注册字体
         for font_name, font_files in font_mappings.items():
-            for font_file in font_files:
-                font_path = fonts_dir / font_file
-                if font_path.exists():
-                    try:
-                        pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
-                        self.registered_fonts.add(font_name)
-                        print(f"Successfully registered font: {font_name} from {font_file}")
-                        break
-                    except Exception as e:
-                        print(f"Warning: Failed to register font {font_name}: {e}")
+            if font_name in self.registered_fonts:
+                continue
+                
+            for search_path in search_paths:
+                for font_file in font_files:
+                    font_path = search_path / font_file
+                    if font_path.exists():
+                        try:
+                            pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
+                            self.registered_fonts.add(font_name)
+                            # print(f"Info: Registered font '{font_name}' from {font_path}")
+                            break
+                        except Exception as e:
+                            pass  # 静默失败，继续尝试其他路径
+                
+                if font_name in self.registered_fonts:
+                    break
         
         # 如果成功注册了字体，设置默认字体
         if self.registered_fonts:
@@ -60,7 +111,7 @@ class StyleManager:
                 'SimSun' if 'SimSun' in self.registered_fonts else 
                 next(iter(self.registered_fonts))
             )
-            print(f"Default Chinese font set to: {default_font}")
+            # print(f"Info: Default Chinese font set to '{default_font}'")
             
             # 更新默认样式使用中文字体
             for style_name in ['Normal', 'BodyText', 'Title', 'Heading1', 'Heading2']:

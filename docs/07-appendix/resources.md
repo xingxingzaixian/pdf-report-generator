@@ -46,11 +46,11 @@
 ## 社区
 
 ### GitHub
-- [项目仓库](https://github.com/your-org/pdf-report-generator)
-- [Issue跟踪](https://github.com/your-org/pdf-report-generator/issues)
+- [项目仓库](https://github.com/xingxingzaixian/pdf-report-generator)
+- [Issue跟踪](https://github.com/xingxingzaixian/pdf-report-generator/issues)
 
 ### 讨论
-- [Discussions](https://github.com/your-org/pdf-report-generator/discussions)
+- [Discussions](https://github.com/xingxingzaixian/pdf-report-generator/discussions)
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/reportlab)
 
 ## 相关项目

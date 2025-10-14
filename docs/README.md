@@ -38,7 +38,7 @@
 - **[自动目录](./03-advanced-features/table-of-contents.md)** - 多级目录、自动生成、超链接
 - **[封面设计](./03-advanced-features/cover-pages.md)** - 背景图片/渐变、元素布局、预设模板
 - **[表格合并](./03-advanced-features/table-merging.md)** - 单元格合并的高级用法
-- **[中文字体](./03-advanced-features/chinese-fonts.md)** - 字体配置、Matplotlib中文显示
+- **[中文字体](./03-advanced-features/chinese-fonts.md)** - 字体配置、Matplotlib中文显示 ⭐ **重要**
 - **[图片处理](./03-advanced-features/images-handling.md)** - 高级图片处理技巧
 - **[页码格式](./03-advanced-features/page-numbers.md)** - 阿拉伯、罗马、中文数字
 - **[书签和链接](./03-advanced-features/bookmarks-links.md)** - PDF书签、超链接跳转

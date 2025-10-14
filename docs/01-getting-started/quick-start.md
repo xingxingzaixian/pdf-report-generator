@@ -6,6 +6,37 @@
 
 确保已完成 [安装](./installation.md)。
 
+## 中文字体配置（重要）
+
+**如果您的报告包含中文内容，需要配置中文字体：**
+
+### 快速配置
+
+1. **创建字体目录**：
+   ```bash
+   mkdir fonts
+   ```
+
+2. **添加字体文件**：
+   - **Windows**：从 `C:\Windows\Fonts\` 复制 `SimHei.ttf` 和 `SimSun.ttf` 到 `fonts/` 目录
+   - **Linux**：安装字体包 `sudo apt-get install fonts-wqy-microhei`
+   - **Mac**：使用系统字体或下载开源字体
+
+3. **验证配置**：
+   ```python
+   from pdf_generator import PDFReportGenerator
+   
+   generator = PDFReportGenerator(config_dict={})
+   print("已注册字体：", generator.style_manager.registered_fonts)
+   # 应该输出：{'SimHei', 'SimSun'} 等
+   ```
+
+### 详细说明
+
+完整的中文字体配置指南请参考：
+- [中文字体配置](../03-advanced-features/chinese-fonts.md)
+- [字体配置指南](../../FONT_CONFIGURATION.md)
+
 ## 方式一：最简单的示例
 
 ### 1. 创建Python脚本
@@ -35,7 +66,7 @@ config = {
     ]
 }
 
-# 生成PDF
+# 生成PDF（会自动查找 fonts/ 目录中的中文字体）
 generator = PDFReportGenerator(config_dict=config)
 generator.save("my_first_report.pdf")
 print("✅ PDF报告已生成：my_first_report.pdf")

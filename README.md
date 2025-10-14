@@ -102,6 +102,12 @@ data = pd.DataFrame({
 
 generator.add_data_source("sales", data)
 pdf_bytes = generator.to_bytes()  # 获取字节流
+
+# 方式4: 指定中文字体目录（如需显示中文）
+generator = PDFReportGenerator(
+    config_dict=config,
+    font_dirs=['./fonts', 'C:\\Windows\\Fonts']  # 字体目录
+)
 ```
 
 ### 方式2: Web API服务

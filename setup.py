@@ -10,17 +10,11 @@ setup(
     description="A flexible PDF report generator with JSON configuration support",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/pdf-report-generator",
-    packages=find_packages(exclude=["examples", "tests", "data"]),
+    url="https://github.com/xingxingzaixian/pdf-report-generator",
+    packages=find_packages(exclude=["examples", "tests", "data", "fonts"]),
     package_data={
         "pdf_generator": [
             "templates/*.py",
-            "templates/*.json",
-        ],
-        "": [
-            "fonts/*.TTF",
-            "fonts/README.md",
-            "templates/*.json",
         ],
     },
     include_package_data=True,
