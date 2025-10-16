@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="pdf-report-generator",
-    version="0.1.0",
+    version="0.1.1",
     author="PDF Report Team",
     description="A flexible PDF report generator with JSON configuration support",
     long_description=long_description,

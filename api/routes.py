@@ -24,7 +24,7 @@ async def root():
     """API根路径"""
     return StatusResponse(
         status="running",
-        version="0.1.0",
+        version="0.1.1",
         message="PDF Report Generator API is running"
     )
 

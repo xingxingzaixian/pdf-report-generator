@@ -14,7 +14,7 @@ API Server Usage:
 
 from pdf_generator.core.generator import PDFReportGenerator
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # 主要导出
 __all__ = ["PDFReportGenerator"]
