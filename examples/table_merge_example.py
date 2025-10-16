@@ -76,8 +76,8 @@ def example1_simple_merge():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("table_merge_01_simple.pdf")
-    print("✓ 生成成功: table_merge_01_simple.pdf\n")
+    generator.save("examples/table_merge_01_simple.pdf")
+    print("✓ 生成成功: examples/table_merge_01_simple.pdf\n")
 
 
 # 示例2: 复杂的多区域合并
@@ -146,8 +146,8 @@ def example2_complex_merge():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("table_merge_02_complex.pdf")
-    print("✓ 生成成功: table_merge_02_complex.pdf\n")
+    generator.save("examples/table_merge_02_complex.pdf")
+    print("✓ 生成成功: examples/table_merge_02_complex.pdf\n")
 
 
 # 示例3: 财务报表样式
@@ -212,8 +212,8 @@ def example3_financial_report():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("table_merge_03_financial.pdf")
-    print("✓ 生成成功: table_merge_03_financial.pdf\n")
+    generator.save("examples/table_merge_03_financial.pdf")
+    print("✓ 生成成功: examples/table_merge_03_financial.pdf\n")
 
 
 # 示例4: 课程表样式
@@ -297,8 +297,8 @@ def example4_schedule():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("table_merge_04_schedule.pdf")
-    print("✓ 生成成功: table_merge_04_schedule.pdf\n")
+    generator.save("examples/table_merge_04_schedule.pdf")
+    print("✓ 生成成功: examples/table_merge_04_schedule.pdf\n")
 
 
 # 示例5: 使用数据源的合并表格
@@ -360,9 +360,65 @@ def example5_datasource_merge():
     
     generator = PDFReportGenerator(config_dict=config)
     generator.add_data_source("financial", data)
-    generator.save("table_merge_05_datasource.pdf")
-    print("✓ 生成成功: table_merge_05_datasource.pdf\n")
+    generator.save("examples/table_merge_05_datasource.pdf")
+    print("✓ 生成成功: examples/table_merge_05_datasource.pdf\n")
 
+
+def example6_multi_merge():
+    """多区域合并"""
+    print("示例6: 多区域合并")
+    
+    config = {
+        "metadata": {
+            "title": "多区域合并示例",
+            "pageSize": "A4"
+        },
+        "styles": {
+            "table": {
+                "gridColor": "#000000",
+                "headerBackground": "#FFFFFF",
+                "headerTextColor": "#CCCCCC",
+                "fontSize": 9,
+                "textColor": "#CCCCCC",
+                "alignment": "LEFT",      
+                "valignment": "TOP"    
+            }
+        },
+        "elements": [
+            {
+                "type": "text",
+                "content": "{{metadata.title}}",
+                "style": "title"
+            },
+            {
+                "type": "spacer",
+                "height": 0.3
+            },
+            {
+                "type": "table",
+                "data": [
+                    ["监测分析结论："],
+                    ["工作阻力统计合格率：97.71%  初撑力统计合格率：100.0%"],
+                    ["处理措施："]
+                ],
+                "style": "table",
+                "columnWidths": [6.5],
+                "rowHeights": [0.3, 1, 1.0]
+            },
+            {
+                "type": "table",
+                "data": [
+                    ["区队负责人：", "业务主管：", "生产部："],
+                    ["生产技术中心：", "总工程师：", ""]
+                ],
+                "style": "table",
+                "columnWidths": [2.2, 2.2, 2.1]  # 总宽6.5英寸
+            }
+        ]
+    }
+    generator = PDFReportGenerator(config_dict=config)
+    generator.save("examples/table_merge_06_multi_merge.pdf")
+    print("✓ 生成成功: examples/table_merge_06_multi_merge.pdf\n")
 
 if __name__ == "__main__":
     print("开始生成表格合并示例...\n")
@@ -372,7 +428,7 @@ if __name__ == "__main__":
     example3_financial_report()
     example4_schedule()
     example5_datasource_merge()
-    
+    example6_multi_merge()
     print("=" * 70)
     print("所有示例生成完成！")
     print("=" * 70)
@@ -382,5 +438,6 @@ if __name__ == "__main__":
     print("  3. table_merge_03_financial.pdf - 财务报表")
     print("  4. table_merge_04_schedule.pdf - 课程表")
     print("  5. table_merge_05_datasource.pdf - 数据源+合并")
+    print("  6. table_merge_06_multi_merge.pdf - 多区域合并")
     print()
 

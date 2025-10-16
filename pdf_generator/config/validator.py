@@ -76,12 +76,22 @@ class ConfigValidator:
                             f"Invalid color format '{color}' in style '{style_name}'"
                         )
             
-            # 验证对齐方式
+            # 验证水平对齐方式
             if 'alignment' in style_config:
                 alignment = style_config['alignment']
-                if alignment not in ['left', 'center', 'right', 'justify']:
+                valid_alignments = ['left', 'center', 'right', 'justify', 'LEFT', 'CENTER', 'RIGHT', 'JUSTIFY']
+                if alignment not in valid_alignments:
                     self.errors.append(
                         f"Invalid alignment '{alignment}' in style '{style_name}'"
+                    )
+            
+            # 验证垂直对齐方式
+            if 'valignment' in style_config:
+                valignment = style_config['valignment']
+                valid_valignments = ['top', 'middle', 'bottom', 'TOP', 'MIDDLE', 'BOTTOM']
+                if valignment not in valid_valignments:
+                    self.errors.append(
+                        f"Invalid valignment '{valignment}' in style '{style_name}'"
                     )
     
     def _validate_data_sources(self, data_sources: List[Dict[str, Any]]):
@@ -180,6 +190,73 @@ class ConfigValidator:
                                     f"Table element at index {idx}: mergedCells[{i}] must be "
                                     f"[startRow, startCol, endRow, endCol]"
                                 )
+                
+                # 验证cellAlignments格式
+                if 'cellAlignments' in element:
+                    cell_alignments = element['cellAlignments']
+                    if not isinstance(cell_alignments, list):
+                        self.errors.append(
+                            f"Table element at index {idx}: 'cellAlignments' must be a list"
+                        )
+                    else:
+                        valid_aligns = ['LEFT', 'CENTER', 'RIGHT', 'left', 'center', 'right']
+                        valid_valigns = ['TOP', 'MIDDLE', 'BOTTOM', 'top', 'middle', 'bottom']
+                        
+                        for i, cell_align in enumerate(cell_alignments):
+                            if not isinstance(cell_align, dict):
+                                self.errors.append(
+                                    f"Table element at index {idx}: cellAlignments[{i}] must be a dictionary"
+                                )
+                                continue
+                            
+                            # 验证range
+                            if 'range' not in cell_align:
+                                self.errors.append(
+                                    f"Table element at index {idx}: cellAlignments[{i}] requires 'range' field"
+                                )
+                            else:
+                                range_val = cell_align['range']
+                                if not isinstance(range_val, list) or len(range_val) != 4:
+                                    self.errors.append(
+                                        f"Table element at index {idx}: cellAlignments[{i}].range must be "
+                                        f"[startRow, startCol, endRow, endCol]"
+                                    )
+                            
+                            # 验证align
+                            if 'align' in cell_align:
+                                align = cell_align['align']
+                                if align not in valid_aligns:
+                                    self.errors.append(
+                                        f"Table element at index {idx}: cellAlignments[{i}].align must be "
+                                        f"LEFT/CENTER/RIGHT (case insensitive)"
+                                    )
+                            
+                            # 验证valign
+                            if 'valign' in cell_align:
+                                valign = cell_align['valign']
+                                if valign not in valid_valigns:
+                                    self.errors.append(
+                                        f"Table element at index {idx}: cellAlignments[{i}].valign must be "
+                                        f"TOP/MIDDLE/BOTTOM (case insensitive)"
+                                    )
+                
+                # 验证表格水平对齐
+                if 'hAlign' in element:
+                    h_align = element['hAlign']
+                    valid_h_aligns = ['LEFT', 'CENTER', 'RIGHT', 'left', 'center', 'right']
+                    if h_align not in valid_h_aligns:
+                        self.errors.append(
+                            f"Table element at index {idx}: hAlign must be LEFT/CENTER/RIGHT (case insensitive)"
+                        )
+                
+                # 验证表格垂直对齐
+                if 'vAlign' in element:
+                    v_align = element['vAlign']
+                    valid_v_aligns = ['TOP', 'MIDDLE', 'BOTTOM', 'top', 'middle', 'bottom']
+                    if v_align not in valid_v_aligns:
+                        self.errors.append(
+                            f"Table element at index {idx}: vAlign must be TOP/MIDDLE/BOTTOM (case insensitive)"
+                        )
             
             if element_type == 'chart':
                 if 'chartType' not in element:

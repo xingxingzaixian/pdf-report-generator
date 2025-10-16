@@ -99,11 +99,19 @@ class ElementFactory:
             - columns: 要显示的列（可选，默认显示所有列）
             - headers: 自定义表头（可选）
             - style: 表格样式名称
-            - columnWidths: 列宽列表
+            - columnWidths: 列宽列表（英寸）
+            - rowHeights: 行高列表（英寸，可选）
             - mergedCells: 合并单元格配置，格式：[[startRow, startCol, endRow, endCol], ...]
-            - rowHeights: 行高列表（可选）
             - wrapColumns: 需要自动换行的列索引列表（可选）
             - wrapThreshold: 自动换行的字符长度阈值（默认50）
+            - repeatRows: 跨页时重复显示的行数（默认1，即表头）
+            - repeatCols: 跨页时重复显示的列数（默认0）
+            - splitByRow: 是否按行分割表格（默认True）
+            - hAlign: 表格水平对齐方式（LEFT/CENTER/RIGHT，默认LEFT）
+            - vAlign: 表格垂直对齐方式（TOP/MIDDLE/BOTTOM，默认TOP）
+            - spaceBefore: 表格前的空白高度（英寸，可选）
+            - spaceAfter: 表格后的空白高度（英寸，可选）
+            - cellAlignments: 单元格对齐设置列表，格式：[{"range": [startRow, startCol, endRow, endCol], "align": "LEFT/CENTER/RIGHT", "valign": "TOP/MIDDLE/BOTTOM"}, ...]
         """
         # 获取表格数据
         table_data = None
@@ -175,12 +183,36 @@ class ElementFactory:
         if row_heights:
             row_heights = [h * inch if isinstance(h, (int, float)) else h for h in row_heights]
         
+        # 表格布局参数
+        repeat_rows = config.get('repeatRows', 1)
+        repeat_cols = config.get('repeatCols', 0)
+        split_by_row = 1 if config.get('splitByRow', True) else 0
+        
+        # 表格对齐
+        h_align = config.get('hAlign', 'LEFT').upper()
+        v_align = config.get('vAlign', 'TOP').upper()
+        
+        # 表格前后空白
+        space_before = config.get('spaceBefore')
+        if space_before is not None:
+            space_before = space_before * inch if isinstance(space_before, (int, float)) else space_before
+        
+        space_after = config.get('spaceAfter')
+        if space_after is not None:
+            space_after = space_after * inch if isinstance(space_after, (int, float)) else space_after
+        
         # 创建表格
         table = Table(
             table_data, 
             colWidths=column_widths, 
             rowHeights=row_heights,
-            repeatRows=config.get('repeatRows', 1)
+            repeatRows=repeat_rows,
+            repeatCols=repeat_cols,
+            splitByRow=split_by_row,
+            hAlign=h_align,
+            vAlign=v_align,
+            spaceBefore=space_before,
+            spaceAfter=space_after
         )
         
         # 应用样式
@@ -226,6 +258,41 @@ class ElementFactory:
                 from reportlab.platypus import TableStyle
                 merge_style = TableStyle(merge_commands)
                 table.setStyle(merge_style)
+        
+        # 处理单元格对齐
+        cell_alignments = config.get('cellAlignments', [])
+        if cell_alignments:
+            from reportlab.platypus import TableStyle
+            alignment_commands = []
+            
+            for cell_align in cell_alignments:
+                if 'range' not in cell_align:
+                    continue
+                
+                cell_range = cell_align['range']
+                if len(cell_range) != 4:
+                    continue
+                
+                start_row, start_col, end_row, end_col = cell_range
+                
+                # 水平对齐
+                if 'align' in cell_align:
+                    align_value = cell_align['align'].upper()
+                    alignment_commands.append(
+                        ('ALIGN', (start_col, start_row), (end_col, end_row), align_value)
+                    )
+                
+                # 垂直对齐
+                if 'valign' in cell_align:
+                    valign_value = cell_align['valign'].upper()
+                    alignment_commands.append(
+                        ('VALIGN', (start_col, start_row), (end_col, end_row), valign_value)
+                    )
+            
+            # 应用对齐样式
+            if alignment_commands:
+                alignment_style = TableStyle(alignment_commands)
+                table.setStyle(alignment_style)
         
         return table
     

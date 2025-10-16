@@ -223,7 +223,7 @@ class StyleManager:
         self.custom_styles[name] = style
         return style
     
-    def get_style(self, name: str) -> Optional[ParagraphStyle]:
+    def get_style(self, name: str):
         """获取样式"""
         if name in self.custom_styles:
             return self.custom_styles[name]
@@ -239,11 +239,14 @@ class StyleManager:
             config: 样式配置字典，支持的键：
                 - headerBackground: 表头背景色
                 - headerTextColor: 表头文字颜色
+                - textColor: 表格内容文字颜色
                 - gridColor: 网格线颜色
                 - gridWidth: 网格线宽度
                 - rowBackground: 行背景色（可以是单一颜色或交替颜色列表）
                 - fontSize: 字体大小
                 - padding: 单元格内边距
+                - alignment: 单元格内容水平对齐方式（LEFT/CENTER/RIGHT，默认LEFT）
+                - valignment: 单元格内容垂直对齐方式（TOP/MIDDLE/BOTTOM，默认MIDDLE）
         """
         commands = []
         
@@ -277,6 +280,11 @@ class StyleManager:
         )
         commands.append(('FONTNAME', (0, 1), (-1, -1), content_font))
         
+        # 表格内容文字颜色
+        if 'textColor' in config:
+            content_text_color = self._parse_color(config['textColor'])
+            commands.append(('TEXTCOLOR', (0, 1), (-1, -1), content_text_color))
+
         # 行背景色
         if 'rowBackground' in config:
             row_bg = config['rowBackground']
@@ -300,8 +308,13 @@ class StyleManager:
         commands.append(('TOPPADDING', (0, 0), (-1, -1), padding))
         commands.append(('BOTTOMPADDING', (0, 0), (-1, -1), padding))
         
-        # 垂直居中
-        commands.append(('VALIGN', (0, 0), (-1, -1), 'MIDDLE'))
+        # 水平对齐
+        alignment = config.get('alignment', 'LEFT').upper()
+        commands.append(('ALIGN', (0, 0), (-1, -1), alignment))
+        
+        # 垂直对齐
+        valignment = config.get('valignment', 'MIDDLE').upper()
+        commands.append(('VALIGN', (0, 0), (-1, -1), valignment))
         
         table_style = TableStyle(commands)
         self.table_styles[name] = table_style
