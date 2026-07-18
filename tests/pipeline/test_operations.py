@@ -73,6 +73,10 @@ class TestOperationRegistry:
         result = self.registry.execute({"op": "limit", "n": 2}, self.df)
         assert len(result) == 2
 
+    def test_head_alias(self):
+        result = self.registry.execute({"op": "head", "n": 3}, self.df)
+        assert len(result) == 3
+
     def test_concat_operation(self):
         df1 = pd.DataFrame({"a": [1], "b": [2]})
         df2 = pd.DataFrame({"a": [3], "b": [4]})
@@ -90,3 +94,30 @@ class TestOperationRegistry:
     def test_filter_invalid_expr(self):
         with pytest.raises(ValueError):
             self.registry.execute({"op": "filter", "expr": "invalid {{{"}, self.df)
+
+    def test_select_missing_column_raises(self):
+        with pytest.raises(ValueError, match="not found in DataFrame"):
+            self.registry.execute(
+                {"op": "select", "columns": ["product", "nonexistent"]}, self.df
+            )
+
+    def test_sort_missing_column_raises(self):
+        with pytest.raises(ValueError, match="not found in DataFrame"):
+            self.registry.execute(
+                {"op": "sort", "by": "nonexistent"}, self.df
+            )
+
+    def test_concat_missing_source_raises(self):
+        df1 = pd.DataFrame({"a": [1]})
+        with pytest.raises(ValueError, match="not found in extra_sources"):
+            self.registry.execute(
+                {"op": "concat", "sources": ["missing"]},
+                df1,
+                extra_sources={},
+            )
+
+    def test_concat_empty_sources_raises(self):
+        with pytest.raises(ValueError, match="requires 'sources' field"):
+            self.registry.execute(
+                {"op": "concat", "sources": []}, self.df
+            )

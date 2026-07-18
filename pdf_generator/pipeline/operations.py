@@ -44,7 +44,12 @@ class OperationRegistry:
         handler = self._operations[op_name]
         return handler(step, df, extra_sources)
 
-    def _op_filter(self, step, df, extra_sources):
+    def _op_filter(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Filter rows by expression."""
         expr = step.get("expr")
         if not expr:
@@ -52,16 +57,29 @@ class OperationRegistry:
         mask = self.evaluator.evaluate(expr, df)
         return df[mask].reset_index(drop=True)
 
-    def _op_sort(self, step, df, extra_sources):
+    def _op_sort(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Sort by column."""
         by = step.get("by")
         if not by:
             raise ValueError("Sort operation requires 'by' field")
+        missing = [c for c in (by if isinstance(by, list) else [by]) if c not in df.columns]
+        if missing:
+            raise ValueError(f"Sort column(s) not found in DataFrame: {missing}")
         order = step.get("order", "asc")
         ascending = order.lower() != "desc"
         return df.sort_values(by=by, ascending=ascending).reset_index(drop=True)
 
-    def _op_compute(self, step, df, extra_sources):
+    def _op_compute(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Add computed columns."""
         columns = step.get("columns")
         if not columns:
@@ -71,22 +89,39 @@ class OperationRegistry:
             df[col_name] = self.evaluator.evaluate(expr, df)
         return df
 
-    def _op_select(self, step, df, extra_sources):
+    def _op_select(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Select specific columns."""
         columns = step.get("columns")
         if not columns:
             raise ValueError("Select operation requires 'columns' field")
-        available = [c for c in columns if c in df.columns]
-        return df[available].copy()
+        missing = [c for c in columns if c not in df.columns]
+        if missing:
+            raise ValueError(f"Column(s) not found in DataFrame: {missing}")
+        return df[columns].copy()
 
-    def _op_rename(self, step, df, extra_sources):
+    def _op_rename(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Rename columns."""
         columns = step.get("columns")
         if not columns:
             raise ValueError("Rename operation requires 'columns' field")
         return df.rename(columns=columns)
 
-    def _op_group(self, step, df, extra_sources):
+    def _op_group(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Group by column and aggregate."""
         by = step.get("by")
         if not by:
@@ -96,20 +131,30 @@ class OperationRegistry:
             raise ValueError("Group operation requires 'agg' field")
         return df.groupby(by=by).agg(agg).reset_index()
 
-    def _op_limit(self, step, df, extra_sources):
+    def _op_limit(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Take first N rows."""
         n = step.get("n", 10)
         return df.head(n).reset_index(drop=True)
 
-    def _op_concat(self, step, df, extra_sources):
+    def _op_concat(
+        self,
+        step: Dict[str, Any],
+        df: pd.DataFrame,
+        extra_sources: Optional[Dict[str, pd.DataFrame]],
+    ) -> pd.DataFrame:
         """Concatenate multiple data sources."""
         sources = step.get("sources", [])
         if not sources:
             raise ValueError("Concat operation requires 'sources' field")
         if not extra_sources:
             extra_sources = {}
-        frames = []
-        for src_name in sources:
-            if src_name in extra_sources:
-                frames.append(extra_sources[src_name])
+        missing = [s for s in sources if s not in extra_sources]
+        if missing:
+            raise ValueError(f"Source(s) not found in extra_sources: {missing}")
+        frames = [extra_sources[s] for s in sources]
         return pd.concat(frames, ignore_index=True)
