@@ -38,8 +38,8 @@ def example_1_auto_detect():
     generator = PDFReportGenerator(config_dict=config)
     print(f"已注册字体: {generator.style_manager.registered_fonts}")
     
-    generator.generate("font_example_01_auto.pdf")
-    print("✅ 已生成: font_example_01_auto.pdf")
+    generator.generate("examples/font_example_01_auto.pdf")
+    print("✅ 已生成: examples/font_example_01_auto.pdf")
 
 
 def example_2_specify_dirs():
@@ -81,8 +81,8 @@ def example_2_specify_dirs():
     print(f"搜索目录: {font_dirs}")
     print(f"已注册字体: {generator.style_manager.registered_fonts}")
     
-    generator.generate("font_example_02_dirs.pdf")
-    print("✅ 已生成: font_example_02_dirs.pdf")
+    generator.generate("examples/font_example_02_dirs.pdf")
+    print("✅ 已生成: examples/font_example_02_dirs.pdf")
 
 
 def example_3_config_file():
@@ -110,8 +110,8 @@ def example_3_config_file():
     generator = PDFReportGenerator(config_dict=config)
     print(f"已注册字体: {generator.style_manager.registered_fonts}")
     
-    generator.generate("font_example_03_config.pdf")
-    print("✅ 已生成: font_example_03_config.pdf")
+    generator.generate("examples/font_example_03_config.pdf")
+    print("✅ 已生成: examples/font_example_03_config.pdf")
 
 
 def example_4_custom_font():
@@ -152,8 +152,8 @@ def example_4_custom_font():
     
     print(f"已注册字体: {generator.style_manager.registered_fonts}")
     
-    generator.generate("font_example_04_custom.pdf")
-    print("✅ 已生成: font_example_04_custom.pdf")
+    generator.generate("examples/font_example_04_custom.pdf")
+    print("✅ 已生成: examples/font_example_04_custom.pdf")
 
 
 def example_5_test_fonts():
@@ -210,8 +210,8 @@ def example_5_test_fonts():
         print("  ⚠️  未找到中文字体，中文可能显示为方框")
         print("     请检查字体配置（参考 FONT_CONFIGURATION.md）")
     
-    generator.generate("font_example_05_test.pdf")
-    print("\n✅ 已生成: font_example_05_test.pdf")
+    generator.generate("examples/font_example_05_test.pdf")
+    print("\n✅ 已生成: examples/font_example_05_test.pdf")
     print("   请打开 PDF 检查字体显示效果")
 
 

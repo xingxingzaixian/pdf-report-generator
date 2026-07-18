@@ -43,7 +43,7 @@ def start_api_server(
     
     # 确保 api 模块可以被导入
     try:
-        from api.main import app
+        from pdf_generator.api.main import app
     except ImportError:
         # 尝试添加当前目录到 Python 路径
         current_dir = os.getcwd()
@@ -51,10 +51,10 @@ def start_api_server(
             sys.path.insert(0, current_dir)
         
         try:
-            from api.main import app
+            from pdf_generator.api.main import app
         except ImportError:
             raise ImportError(
-                "无法导入 API 模块。请确保在项目根目录运行，或者 'api' 模块在 Python 路径中。"
+                "无法导入 API 模块。请确保 'pdf_generator' 模块在 Python 路径中。"
             )
     
     print(f"🚀 启动 PDF Report Generator API 服务器...")
@@ -66,7 +66,7 @@ def start_api_server(
     print()
     
     uvicorn.run(
-        "api.main:app",
+        "pdf_generator.api.main:app",
         host=host,
         port=port,
         reload=reload,
@@ -93,7 +93,7 @@ def create_app():
         >>>     return {"message": "Custom endpoint"}
     """
     try:
-        from api.main import app
+        from pdf_generator.api.main import app
         return app
     except ImportError:
         raise ImportError(

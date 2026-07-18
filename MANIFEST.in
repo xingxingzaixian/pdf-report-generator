@@ -2,12 +2,6 @@
 include README.md
 include LICENSE
 include requirements.txt
-include QUICKSTART.md
-include USAGE_GUIDE.md
-include TABLE_MERGE_GUIDE.md
-include INSTALLATION.md
-include PACKAGE_USAGE.md
-include BUILD_PUBLISH.md
 
 # 包含模板示例（仅示例，不作为包数据）
 recursive-include templates *.json

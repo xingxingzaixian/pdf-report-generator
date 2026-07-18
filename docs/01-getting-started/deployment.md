@@ -257,7 +257,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # 启动命令
-CMD ["gunicorn", "api.main:app", \
+CMD ["gunicorn", "pdf_generator.api.main:app", \
      "--workers", "4", \
      "--worker-class", "uvicorn.workers.UvicornWorker", \
      "--bind", "0.0.0.0:8000", \
@@ -348,7 +348,7 @@ RUN apt-get update && \
 
 COPY . .
 EXPOSE 8000
-CMD ["gunicorn", "api.main:app", ...]
+CMD ["gunicorn", "pdf_generator.api.main:app", ...]
 ```
 
 ## 云平台部署

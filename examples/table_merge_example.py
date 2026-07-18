@@ -377,9 +377,9 @@ def example6_multi_merge():
             "table": {
                 "gridColor": "#000000",
                 "headerBackground": "#FFFFFF",
-                "headerTextColor": "#CCCCCC",
+                "headerTextColor": "#000000",
                 "fontSize": 9,
-                "textColor": "#CCCCCC",
+                "textColor": "#000000",
                 "alignment": "LEFT",      
                 "valignment": "TOP"    
             }

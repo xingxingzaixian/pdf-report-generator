@@ -62,7 +62,7 @@ pdf-report-api = "pdf_generator.cli:run_api"
 [tool.setuptools]
 packages = ["pdf_generator", "pdf_generator.config", "pdf_generator.core", 
             "pdf_generator.data_sources", "pdf_generator.templates", 
-            "pdf_generator.utils", "api"]
+            "pdf_generator.utils", "pdf_generator.api"]
 
 [tool.setuptools.package-data]
 pdf_generator = ["templates/*.py", "templates/*.json"]
@@ -77,3 +77,8 @@ publish-url = "https://upload.pypi.org/legacy/"
 name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+]

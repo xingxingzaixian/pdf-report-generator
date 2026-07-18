@@ -35,7 +35,7 @@ def example_1_basic_generation():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    output_file = "library_example_01_basic.pdf"
+    output_file = "examples/library_example_01_basic.pdf"
     generator.generate(output_file)
     
     print(f"✅ PDF 已生成: {output_file}")
@@ -86,7 +86,7 @@ def example_2_with_data():
     generator = PDFReportGenerator(config_dict=config)
     generator.add_data_source("sales", sales_data)
     
-    output_file = "library_example_02_data.pdf"
+    output_file = "examples/library_example_02_data.pdf"
     generator.generate(output_file)
     
     print(f"✅ PDF 已生成: {output_file}")
@@ -122,7 +122,7 @@ def example_3_to_bytes():
     print(f"✅ PDF 字节流已生成，大小: {len(pdf_bytes)} 字节")
     
     # 可以将字节流保存到文件
-    with open("library_example_03_bytes.pdf", "wb") as f:
+    with open("examples/library_example_03_bytes.pdf", "wb") as f:
         f.write(pdf_bytes)
     
     print("✅ 字节流已保存到文件")
@@ -220,7 +220,7 @@ def example_6_from_json_file():
             config = json.load(f)
         
         generator = PDFReportGenerator(config_dict=config)
-        output_file = "library_example_06_from_json.pdf"
+        output_file = "examples/library_example_06_from_json.pdf"
         generator.generate(output_file)
         
         print(f"✅ PDF 已从配置文件生成: {output_file}")
@@ -311,7 +311,7 @@ def example_7_comprehensive_report():
     generator = PDFReportGenerator(config_dict=config)
     generator.add_data_source("monthly", monthly_data)
     
-    output_file = "library_example_07_comprehensive.pdf"
+    output_file = "examples/library_example_07_comprehensive.pdf"
     generator.generate(output_file)
     
     print(f"✅ 完整报告已生成: {output_file}")

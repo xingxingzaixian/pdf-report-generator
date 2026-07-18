@@ -60,8 +60,8 @@ config1 = {
 
 try:
     generator1 = PDFReportGenerator(config_dict=config1)
-    generator1.save("smaple_01_simple.pdf")
-    print("✓ 成功生成: smaple_01_simple.pdf")
+    generator1.save("examples/smaple_01_simple.pdf")
+    print("✓ 成功生成: examples/smaple_01_simple.pdf")
 except Exception as e:
     print(f"✗ 生成失败: {e}")
 
@@ -129,8 +129,8 @@ config2 = {
 try:
     generator2 = PDFReportGenerator(config_dict=config2)
     generator2.add_data_source("sales", sales_data)
-    generator2.save("smaple_02_table.pdf")
-    print("✓ 成功生成: smaple_02_table.pdf")
+    generator2.save("examples/smaple_02_table.pdf")
+    print("✓ 成功生成: examples/smaple_02_table.pdf")
 except Exception as e:
     print(f"✗ 生成失败: {e}")
 
@@ -209,8 +209,8 @@ config3 = {
 try:
     generator3 = PDFReportGenerator(config_dict=config3)
     generator3.add_data_source("sales", sales_data)
-    generator3.save("smaple_03_charts.pdf")
-    print("✓ 成功生成: smaple_03_charts.pdf")
+    generator3.save("examples/smaple_03_charts.pdf")
+    print("✓ 成功生成: examples/smaple_03_charts.pdf")
 except Exception as e:
     print(f"✗ 生成失败: {e}")
 
@@ -366,8 +366,8 @@ config4 = {
 try:
     generator4 = PDFReportGenerator(config_dict=config4)
     generator4.add_data_source("sales", sales_data)
-    generator4.save("smaple_04_comprehensive.pdf")
-    print("✓ 成功生成: smaple_04_comprehensive.pdf")
+    generator4.save("examples/smaple_04_comprehensive.pdf")
+    print("✓ 成功生成: examples/smaple_04_comprehensive.pdf")
 except Exception as e:
     print(f"✗ 生成失败: {e}")
 

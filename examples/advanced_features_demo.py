@@ -108,8 +108,8 @@ def example1_header_footer():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("output_header_footer.pdf")
-    print("✅ 页眉页脚示例生成完成: output_header_footer.pdf")
+    generator.save("examples/output_header_footer.pdf")
+    print("✅ 页眉页脚示例生成完成: examples/output_header_footer.pdf")
 
 
 def example2_toc_auto():
@@ -215,8 +215,8 @@ def example2_toc_auto():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("output_toc_auto.pdf")
-    print("✅ 自动目录示例生成完成: output_toc_auto.pdf")
+    generator.save("examples/output_toc_auto.pdf")
+    print("✅ 自动目录示例生成完成: examples/output_toc_auto.pdf")
 
 
 def example3_cover_page():
@@ -284,8 +284,8 @@ def example3_cover_page():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("output_cover_page.pdf")
-    print("✅ 封面页示例生成完成: output_cover_page.pdf")
+    generator.save("examples/output_cover_page.pdf")
+    print("✅ 封面页示例生成完成: examples/output_cover_page.pdf")
 
 
 def example4_complete_report():
@@ -471,8 +471,8 @@ def example4_complete_report():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("output_complete_report.pdf")
-    print("✅ 完整报告示例生成完成: output_complete_report.pdf")
+    generator.save("examples/output_complete_report.pdf")
+    print("✅ 完整报告示例生成完成: examples/output_complete_report.pdf")
 
 
 def example5_page_number_formats():
@@ -542,8 +542,8 @@ def example5_page_number_formats():
     }
     
     generator = PDFReportGenerator(config_dict=config)
-    generator.save("output_page_formats.pdf")
-    print("✅ 页码格式示例生成完成: output_page_formats.pdf")
+    generator.save("examples/output_page_formats.pdf")
+    print("✅ 页码格式示例生成完成: examples/output_page_formats.pdf")
 
 
 if __name__ == "__main__":
