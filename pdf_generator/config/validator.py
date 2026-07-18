@@ -140,7 +140,26 @@ class ConfigValidator:
                 self.errors.append(
                     f"Data source '{name}' of type 'database' requires 'query' field"
                 )
-    
+
+            # Validate pipeline if present
+            if 'pipeline' in source:
+                pipeline = source['pipeline']
+                if not isinstance(pipeline, list):
+                    self.errors.append(f"Data source '{name}': 'pipeline' must be a list")
+                else:
+                    valid_ops = ['filter', 'sort', 'compute', 'select', 'rename', 'group', 'limit', 'head', 'concat']
+                    for i, step in enumerate(pipeline):
+                        if not isinstance(step, dict):
+                            self.errors.append(f"Data source '{name}': pipeline[{i}] must be a dictionary")
+                            continue
+                        if 'op' not in step:
+                            self.errors.append(f"Data source '{name}': pipeline[{i}] requires 'op' field")
+                        elif step['op'] not in valid_ops:
+                            self.errors.append(
+                                f"Data source '{name}': pipeline[{i}] has invalid op '{step['op']}'. "
+                                f"Must be one of {valid_ops}"
+                            )
+
     def _validate_elements(self, elements: List[Dict[str, Any]]):
         """验证PDF元素配置"""
         if not elements:
@@ -164,7 +183,21 @@ class ConfigValidator:
                     f"Must be one of {self.VALID_ELEMENT_TYPES}"
                 )
                 continue
-            
+
+            # Validate condition if present
+            if 'condition' in element:
+                condition = element['condition']
+                if not isinstance(condition, str):
+                    self.errors.append(f"Element at index {idx}: 'condition' must be a string")
+
+            # Validate loop if present
+            if 'loop' in element:
+                loop = element['loop']
+                if not isinstance(loop, dict):
+                    self.errors.append(f"Element at index {idx}: 'loop' must be a dictionary")
+                elif 'dataSource' not in loop:
+                    self.errors.append(f"Element at index {idx}: loop requires 'dataSource' field")
+
             # 根据元素类型验证必需字段
             if element_type == 'text' and 'content' not in element:
                 self.errors.append(f"Text element at index {idx} requires 'content' field")
