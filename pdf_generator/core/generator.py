@@ -3,6 +3,7 @@
 from typing import Dict, Any, Optional, Union, BinaryIO
 from pathlib import Path
 import io
+import re
 
 from reportlab.lib.pagesizes import A4, A3, A5, LETTER, LEGAL, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, BaseDocTemplate, PageTemplate, Frame
@@ -193,7 +194,6 @@ class PDFReportGenerator:
                         flat_context[f'dataSources_{ds_name}'] = {}
 
             # Normalize condition: dataSources.xxx.yyy -> dataSources_xxx.yyy
-            import re
             normalized = re.sub(r'dataSources\.([\w]+)\.([\w]+)', r'dataSources_\1.\2', condition)
 
             return bool(evaluator.evaluate(normalized, flat_context))

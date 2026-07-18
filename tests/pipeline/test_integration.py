@@ -1,6 +1,5 @@
 """Integration tests for pipeline in PDF generation."""
 
-import json
 import os
 import tempfile
 
@@ -15,6 +14,7 @@ class TestPipelineIntegration:
 
     def test_pipeline_with_csv_source(self):
         """Test that pipeline transforms data before PDF generation."""
+        pdf_path = None
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             f.write("product,quantity,price\n")
             f.write("A,100,10\n")
@@ -47,12 +47,13 @@ class TestPipelineIntegration:
 
             generator = PDFReportGenerator(config_dict=config)
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as pdf:
+                pdf_path = pdf.name
                 generator.save(pdf.name)
                 assert os.path.exists(pdf.name)
         finally:
             os.unlink(csv_path)
-            if os.path.exists(pdf.name):
-                os.unlink(pdf.name)
+            if pdf_path and os.path.exists(pdf_path):
+                os.unlink(pdf_path)
 
     def test_condition_hides_element(self):
         """Test that condition=False hides element."""
