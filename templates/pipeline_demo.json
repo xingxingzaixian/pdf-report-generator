@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "title": "Pipeline Demo Report",
+    "author": "PDF Generator",
+    "pageSize": "A4"
+  },
+  "dataSources": [
+    {
+      "name": "sales",
+      "type": "csv",
+      "path": "data/sales.csv",
+      "pipeline": [
+        {"op": "filter", "expr": "quantity > 0"},
+        {"op": "compute", "columns": {"revenue": "quantity * price"}},
+        {"op": "sort", "by": "revenue", "order": "desc"}
+      ]
+    },
+    {
+      "name": "summary",
+      "type": "inline",
+      "data": {
+        "total_revenue": [50000],
+        "profit_margin": [0.15]
+      }
+    }
+  ],
+  "elements": [
+    {
+      "type": "text",
+      "content": "{{metadata.title}}",
+      "style": "title"
+    },
+    {
+      "type": "text",
+      "content": "Revenue: {{dataSources.summary.total_revenue}}",
+      "condition": "dataSources.summary.total_revenue > 0"
+    },
+    {
+      "type": "table",
+      "dataSource": "sales",
+      "columns": ["product", "quantity", "price", "revenue"],
+      "style": "tableStyle"
+    }
+  ]
+}
