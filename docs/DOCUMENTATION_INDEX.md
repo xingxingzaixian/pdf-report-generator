@@ -35,6 +35,8 @@ PDF报告生成器完整文档已创建。
 - [x] images-handling.md - 图片处理
 - [x] page-numbers.md - 页码格式
 - [x] bookmarks-links.md - 书签和链接
+- [x] data-pipeline.md - 数据管道 ⭐ **新增**
+- [x] conditional-rendering.md - 条件渲染与动态循环 ⭐ **新增**
 
 #### 4. API参考 (docs/04-api-reference/)
 - [x] web-api.md - Web API文档
@@ -81,6 +83,8 @@ PDF报告生成器完整文档已创建。
 - **设计封面** → cover-pages.md
 - **中文支持** → chinese-fonts.md
 - **API调用** → web-api.md
+- **数据管道** → data-pipeline.md ⭐ **新增**
+- **条件渲染** → conditional-rendering.md ⭐ **新增**
 
 ### 按问题查找
 

@@ -13,6 +13,34 @@ PDF报告生成器支持多种数据源类型，本文档详细介绍每种数�
 - **数据库** - SQL数据库
 - **内联数据** - 直接在配置中定义数据
 
+### 数据管道
+
+每个数据源都可以配置 `pipeline` 字段，在数据加载后执行转换操作。支持的操作包括：
+
+- `filter` - 按表达式筛选行
+- `sort` - 排序
+- `compute` - 添加计算列
+- `group` - 分组聚合
+- `select` - 选择列
+- `rename` - 重命名列
+- `concat` - 合并多个数据源
+- `limit` / `head` - 限制行数
+
+```json
+{
+  "name": "sales",
+  "type": "csv",
+  "path": "data/sales.csv",
+  "pipeline": [
+    {"op": "filter", "expr": "quantity > 0"},
+    {"op": "compute", "columns": {"revenue": "quantity * price"}},
+    {"op": "sort", "by": "revenue", "order": "desc"}
+  ]
+}
+```
+
+> 详细文档请查看 [数据管道](../03-advanced-features/data-pipeline.md)
+
 ### 数据源配置结构
 
 ```json
