@@ -20,6 +20,7 @@ from pdf_generator.data_sources.database import DatabaseDataSource
 from pdf_generator.core.page_template import PageTemplateManager, NumberedCanvas
 from pdf_generator.core.toc_generator import TOCGenerator
 from pdf_generator.core.cover_page import CoverPageGenerator
+from pdf_generator.pipeline.engine import PipelineEngine
 
 
 class PDFReportGenerator:
@@ -111,11 +112,12 @@ class PDFReportGenerator:
     def _load_data_sources(self):
         """从配置加载数据源"""
         data_sources_config = self.config_parser.get_data_sources()
-        
+        pipeline_engine = PipelineEngine()
+
         for ds_config in data_sources_config:
             name = ds_config['name']
             ds_type = ds_config['type']
-            
+
             # 创建数据源对象
             if ds_type in ['json', 'inline']:
                 data_source = JSONDataSource(ds_config)
@@ -128,12 +130,21 @@ class PDFReportGenerator:
             else:
                 print(f"Warning: Unsupported data source type '{ds_type}' for '{name}'")
                 continue
-            
+
             self.data_source_objects[name] = data_source
-            
+
             # 预加载数据
             try:
-                self.data_sources[name] = data_source.get_data()
+                df = data_source.get_data()
+                # Execute pipeline if defined
+                pipeline = ds_config.get('pipeline', [])
+                if pipeline:
+                    try:
+                        df = pipeline_engine.execute(pipeline, df, self.data_sources)
+                        print(f"Pipeline executed for '{name}': {len(df)} rows after transformation")
+                    except Exception as e:
+                        print(f"Warning: Pipeline failed for '{name}': {e}")
+                self.data_sources[name] = df
                 print(f"Loaded data source '{name}': {len(self.data_sources[name])} rows")
             except Exception as e:
                 print(f"Warning: Failed to load data source '{name}': {e}")
@@ -165,75 +176,150 @@ class PDFReportGenerator:
         
         return page_size
     
+    def _evaluate_condition(self, condition: str, context: dict) -> bool:
+        """Evaluate a condition expression for conditional rendering."""
+        from pdf_generator.pipeline.expression import ExpressionEvaluator
+        evaluator = ExpressionEvaluator()
+        try:
+            # Build flat context for expression evaluation
+            flat_context = {}
+            if 'metadata' in context:
+                flat_context['metadata'] = context['metadata']
+            if 'dataSources' in context:
+                for ds_name, ds_df in context['dataSources'].items():
+                    if hasattr(ds_df, 'iloc') and len(ds_df) > 0:
+                        flat_context[f'dataSources_{ds_name}'] = ds_df.iloc[0].to_dict()
+                    else:
+                        flat_context[f'dataSources_{ds_name}'] = {}
+
+            # Normalize condition: dataSources.xxx.yyy -> dataSources_xxx.yyy
+            import re
+            normalized = re.sub(r'dataSources\.([\w]+)\.([\w]+)', r'dataSources_\1.\2', condition)
+
+            return bool(evaluator.evaluate(normalized, flat_context))
+        except Exception as e:
+            print(f"Warning: Condition evaluation failed for '{condition}': {e}")
+            return True  # fail-open
+
+    def _expand_loop(self, element_config: dict, loop_config: dict) -> list:
+        """Expand a loop configuration into multiple element configs."""
+        ds_name = loop_config.get('dataSource')
+        group_by = loop_config.get('groupBy')
+
+        if not ds_name or not group_by:
+            return [element_config]
+
+        if ds_name not in self.data_sources:
+            print(f"Warning: Loop data source '{ds_name}' not found")
+            return []
+
+        df = self.data_sources[ds_name]
+        if group_by not in df.columns:
+            print(f"Warning: Group column '{group_by}' not found in '{ds_name}'")
+            return [element_config]
+
+        unique_values = df[group_by].unique()
+        expanded = []
+
+        for value in unique_values:
+            # Clone element config
+            new_config = element_config.copy()
+            new_config.pop('loop', None)  # Remove loop to prevent recursion
+
+            # Get current row data
+            current_row = df[df[group_by] == value].iloc[0].to_dict()
+            new_config['_current'] = current_row
+
+            # Replace {{current.xxx}} in text fields
+            for key in ['text', 'content', 'title']:
+                if key in new_config and isinstance(new_config[key], str):
+                    for field, val in current_row.items():
+                        placeholder = f'{{{{current.{field}}}}}'
+                        new_config[key] = new_config[key].replace(placeholder, str(val))
+
+            expanded.append(new_config)
+
+        return expanded
+
     def _build_story(self, page_size: tuple) -> list:
         """构建PDF内容流
-        
+
         Args:
             page_size: 页面大小 (width, height)
         """
         story = []
-        
+
         # 准备模板上下文
         metadata = self.config_parser.get_metadata()
         context = {
             'metadata': metadata,
             'dataSources': self.data_sources,
         }
-        
+
         # 1. 添加封面页（如果启用）
         if self.cover_generator and self.cover_generator.is_enabled():
             cover_elements = self.cover_generator.generate(page_size, context)
             story.extend(cover_elements)
-        
+
         # 2. 添加目录（如果启用）
         if self.toc_generator and self.toc_generator.is_enabled():
             toc_elements = self.toc_generator.generate_toc_elements()
             story.extend(toc_elements)
-        
+
         # 3. 获取元素配置
         elements_config = self.config_parser.get_elements()
-        
+
         # 4. 生成每个元素
         for element_config in elements_config:
-            try:
-                # 处理模板变量
-                processed_config = self.config_parser.process_element_content(
-                    element_config, context
-                )
-                
-                # 创建PDF元素
-                element_type = processed_config['type']
-                
-                # 特殊处理：如果是heading且启用了TOC自动生成
-                if element_type == 'heading' and self.toc_generator and self.toc_generator.is_auto_generate():
-                    level = processed_config.get('level', 1)
-                    text = processed_config.get('text', '')
-                    style_name = processed_config.get('style', f'Heading{level}')
-                    
-                    # 使用TOC生成器创建带书签的标题
-                    pdf_element = self.toc_generator.create_heading_with_bookmark(
-                        text, level, style_name
+            # Handle loop: expand element for each group value
+            loop_config = element_config.get('loop')
+            if loop_config:
+                elements_to_process = self._expand_loop(element_config, loop_config)
+            else:
+                elements_to_process = [element_config]
+
+            for expanded_config in elements_to_process:
+                # Handle condition: skip element if condition is false
+                condition = expanded_config.get('condition')
+                if condition and not self._evaluate_condition(condition, context):
+                    continue
+
+                try:
+                    # 处理模板变量
+                    processed_config = self.config_parser.process_element_content(
+                        expanded_config, context
                     )
-                else:
-                    # 普通元素
-                    pdf_element = self.element_factory.create_element(
-                        element_type,
-                        processed_config,
-                        self.data_sources
+
+                    # 创建PDF元素
+                    element_type = processed_config['type']
+
+                    # 特殊处理：如果是heading且启用了TOC自动生成
+                    if element_type == 'heading' and self.toc_generator and self.toc_generator.is_auto_generate():
+                        level = processed_config.get('level', 1)
+                        text = processed_config.get('text', '')
+                        style_name = processed_config.get('style', f'Heading{level}')
+
+                        pdf_element = self.toc_generator.create_heading_with_bookmark(
+                            text, level, style_name
+                        )
+                    else:
+                        pdf_element = self.element_factory.create_element(
+                            element_type,
+                            processed_config,
+                            self.data_sources
+                        )
+
+                    story.append(pdf_element)
+
+                except Exception as e:
+                    error_text = f"Error creating element: {e}"
+                    print(f"Warning: {error_text}")
+                    error_para = Paragraph(
+                        f"<font color='red'>{error_text}</font>",
+                        self.style_manager.get_style('Normal')
                     )
-                
-                story.append(pdf_element)
-            
-            except Exception as e:
-                # 错误处理：添加错误信息到PDF
-                error_text = f"Error creating element: {e}"
-                print(f"Warning: {error_text}")
-                error_para = Paragraph(
-                    f"<font color='red'>{error_text}</font>",
-                    self.style_manager.get_style('Normal')
-                )
-                story.append(error_para)
-        
+                    story.append(error_para)
+
         return story
     
     def generate(
