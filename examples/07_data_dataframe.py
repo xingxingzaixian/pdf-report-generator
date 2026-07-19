@@ -1,8 +1,12 @@
 """
-07 - DataFrame 数据源：编程方式注入 pandas DataFrame
+07 - 编程注入数据源：DataFrame / dict / list 多种数据类型
 
-演示通过 add_data_source() 方法动态注入数据，
-无需依赖外部文件，适合从数据库或其他来源获取数据后动态生成报告。
+演示 add_data_source() 支持的所有数据类型：
+1. pandas DataFrame
+2. dict（自动转换为 DataFrame）
+3. list of dict（自动转换为 DataFrame）
+
+同时展示 config dataSources 中 inline 方式的等效写法。
 """
 
 import os, sys
@@ -11,74 +15,89 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import pandas as pd
 from pdf_generator import PDFReportGenerator
 
-# 方式1: 从字典创建 DataFrame
-sales = pd.DataFrame({
+
+# ============================================================
+# 方式1: 注入 pandas DataFrame
+# ============================================================
+sales_df = pd.DataFrame({
     "产品": ["笔记本", "台式机", "平板", "手机", "配件"],
     "Q1": [120, 80, 200, 350, 500],
     "Q2": [145, 90, 220, 380, 520],
-    "Q3": [160, 95, 250, 400, 550],
-    "Q4": [180, 100, 280, 420, 580],
 })
 
-# 方式2: 从列表创建 DataFrame（带中文列名）
-employees = pd.DataFrame([
-    {"姓名": "张三", "部门": "技术部", "工龄": 5, "绩效": "A"},
-    {"姓名": "李四", "部门": "销售部", "工龄": 3, "绩效": "B"},
-    {"姓名": "王五", "部门": "技术部", "工龄": 7, "绩效": "A"},
-    {"姓名": "赵六", "部门": "市场部", "工龄": 2, "绩效": "C"},
-    {"姓名": "钱七", "部门": "销售部", "工龄": 4, "绩效": "B"},
-])
-
-config = {
-    "metadata": {"title": "DataFrame 动态数据源"},
-    "styles": {
-        "blueTable": {
-            "gridColor": "#BDC3C7",
-            "headerBackground": "#2980B9",
-            "headerTextColor": "#FFFFFF",
-            "fontSize": 10,
-            "padding": 8
-        },
-        "greenTable": {
-            "gridColor": "#BDC3C7",
-            "headerBackground": "#27AE60",
-            "headerTextColor": "#FFFFFF",
-            "fontSize": 10,
-            "padding": 8
-        }
-    },
+config1 = {
+    "metadata": {"title": "DataFrame 注入"},
     "elements": [
-        {"type": "text", "content": "{{metadata.title}}", "style": "Title"},
-        {"type": "spacer", "height": 0.3},
-
-        # 数据源1: sales
-        {"type": "text", "content": "销售数据（蓝色主题）", "style": "Heading2"},
-        {"type": "table", "dataSource": "sales", "style": "blueTable"},
-        {"type": "spacer", "height": 0.3},
-
-        # 图表
-        {"type": "text", "content": "季度销量趋势", "style": "Heading2"},
-        {
-            "type": "chart",
-            "dataSource": "sales",
-            "chartType": "line",
-            "xAxis": "产品",
-            "yAxis": ["Q1", "Q2", "Q3", "Q4"],
-            "title": "各产品季度销量趋势",
-            "width": 6.5,
-            "height": 4,
-            "grid": True
-        },
-        {"type": "pagebreak"},
-
-        # 数据源2: employees
-        {"type": "text", "content": "员工信息（绿色主题）", "style": "Heading2"},
-        {"type": "table", "dataSource": "employees", "style": "greenTable"},
+        {"type": "text", "content": "pandas DataFrame 数据", "style": "Title"},
+        {"type": "spacer", "height": 0.2},
+        {"type": "table", "dataSource": "sales", "style": "Normal"},
     ]
 }
+gen1 = PDFReportGenerator(config_dict=config1)
+gen1.add_data_source("sales", sales_df)
+gen1.save("examples/output/07_data_dataframe_a.pdf")
+print("✅ 已生成: examples/output/07_data_dataframe_a.pdf")
 
-generator = PDFReportGenerator(config_dict=config)
-generator.add_data_source("sales", sales)
-generator.add_data_source("employees", employees)
-generator.save("examples/output/07_data_dataframe.pdf")
-print("✅ 已生成: examples/output/07_data_dataframe.pdf")
+
+# ============================================================
+# 方式2: 注入 dict — add_data_source 自动转为 DataFrame
+# ============================================================
+sales_dict = {
+    "产品": ["笔记本", "台式机", "平板"],
+    "销量": [450, 320, 580],
+    "单价": [5999, 4299, 2999],
+}
+
+config2 = {
+    "metadata": {"title": "dict 数据注入"},
+    "elements": [
+        {"type": "text", "content": "dict 自动转为 DataFrame", "style": "Title"},
+        {"type": "text", "content": "add_data_source 支持 dict 类型，自动转换。"},
+        {"type": "spacer", "height": 0.2},
+        {"type": "table", "dataSource": "sales", "style": "Normal"},
+    ]
+}
+gen2 = PDFReportGenerator(config_dict=config2)
+gen2.add_data_source("sales", sales_dict)
+gen2.save("examples/output/07_data_dataframe_b.pdf")
+print("✅ 已生成: examples/output/07_data_dataframe_b.pdf")
+
+
+# ============================================================
+# 方式3: 注入 list of dict — 自动转为 DataFrame
+# ============================================================
+sales_list = [
+    {"产品": "笔记本", "销量": 450, "单价": 5999},
+    {"产品": "台式机", "销量": 320, "单价": 4299},
+    {"产品": "平板", "销量": 580, "单价": 2999},
+]
+
+config3 = {
+    "metadata": {"title": "list of dict 数据注入"},
+    "elements": [
+        {"type": "text", "content": "list of dict 自动转为 DataFrame", "style": "Title"},
+        {"type": "text", "content": "add_data_source 也支持 list of dict。"},
+        {"type": "spacer", "height": 0.2},
+        {"type": "table", "dataSource": "sales", "style": "Normal"},
+    ]
+}
+gen3 = PDFReportGenerator(config_dict=config3)
+gen3.add_data_source("sales", sales_list)
+gen3.save("examples/output/07_data_dataframe_c.pdf")
+print("✅ 已生成: examples/output/07_data_dataframe_c.pdf")
+
+
+# ============================================================
+# 等效方式: config dataSources inline（无需 add_data_source）
+# ============================================================
+# config = {
+#     "dataSources": [{
+#         "name": "sales",
+#         "type": "inline",
+#         "data": [
+#             {"产品": "笔记本", "销量": 450, "单价": 5999},
+#             {"产品": "台式机", "销量": 320, "单价": 4299},
+#         ]
+#     }],
+#     "elements": [{"type": "table", "dataSource": "sales"}]
+# }

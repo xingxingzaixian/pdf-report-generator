@@ -1,8 +1,8 @@
 """
-06 - Excel 数据源：从 Excel 文件读取数据生成表格
+06 - Excel 数据源：通过 config 的 dataSources 配置加载 Excel
 
-演示 dataSources 配置中 type: excel 的使用方式。
-需要 data/sales.xlsx 文件存在。
+演示 dataSources 中 type: excel 的使用方式。
+支持 .xlsx 和 .xls 格式，可指定 sheet 名称。
 """
 
 import os, sys
@@ -11,19 +11,21 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from pdf_generator import PDFReportGenerator
 
 config = {
-    "metadata": {"title": "Excel 数据源示例"},
+    "metadata": {"title": "Excel 数据源"},
     "styles": {
         "table": {
-            "gridColor": "#CCCCCC",
-            "headerBackground": "#8E44AD",
-            "headerTextColor": "#FFFFFF",
-            "fontSize": 10,
-            "padding": 8,
+            "gridColor": "#CCCCCC", "headerBackground": "#8E44AD",
+            "headerTextColor": "#FFFFFF", "fontSize": 10, "padding": 8,
             "alternateRowColor": "#F5EEF8"
         }
     },
     "dataSources": [
-        {"name": "sales", "type": "excel", "path": "data/sales.xlsx"}
+        {
+            "name": "sales",
+            "type": "excel",
+            "path": "data/sales.xlsx"
+            # "sheetName": "Sheet1"   # 可选：指定 sheet 名称
+        }
     ],
     "elements": [
         {"type": "text", "content": "{{metadata.title}}", "style": "Title"},

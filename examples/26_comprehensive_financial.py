@@ -1,49 +1,13 @@
 """
-26 - 综合报告：财务报告（合并表格+多图表+管道预处理）
+26 - 综合报告：财务报告（合并表格+多图表+pipeline 预处理）
 
-演示一个完整的财务报告，使用 Pipeline 预处理数据，
-结合合并表格和多图表展示。
+使用 config dataSources + pipeline 内嵌处理，无需 add_data_source。
 """
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import pandas as pd
 from pdf_generator import PDFReportGenerator
-from pdf_generator.pipeline import PipelineEngine
-
-# 原始财务数据
-raw = pd.DataFrame({
-    "月份": ["1月", "1月", "2月", "2月", "3月", "3月", "4月", "4月", "5月", "5月", "6月", "6月"],
-    "类别": ["收入", "支出", "收入", "支出", "收入", "支出", "收入", "支出", "收入", "支出", "收入", "支出"],
-    "金额": [100000, 80000, 120000, 85000, 115000, 90000, 130000, 88000, 140000, 92000, 155000, 95000],
-})
-
-engine = PipelineEngine()
-
-# 管道处理：分离收入/支出并计算利润
-income = engine.execute(
-    pipeline=[
-        {"op": "filter", "expr": "类别 == '收入'"},
-        {"op": "select", "columns": ["月份", "金额"]},
-        {"op": "rename", "columns": {"金额": "收入"}},
-    ],
-    df=raw
-)
-
-expense = engine.execute(
-    pipeline=[
-        {"op": "filter", "expr": "类别 == '支出'"},
-        {"op": "select", "columns": ["月份", "金额"]},
-        {"op": "rename", "columns": {"金额": "支出"}},
-    ],
-    df=raw
-)
-
-# 合并并计算利润
-income["支出"] = expense["支出"].values
-income["利润"] = income["收入"] - income["支出"]
-income["利润率"] = (income["利润"] / income["收入"] * 100).round(1)
 
 config = {
     "metadata": {
@@ -85,50 +49,106 @@ config = {
             "headerTextColor": "#FFFFFF", "fontSize": 10, "padding": 8
         }
     },
+    "dataSources": [
+        {
+            "name": "raw",
+            "type": "inline",
+            "data": [
+                {"月份": "1月", "类别": "收入", "金额": 100000},
+                {"月份": "1月", "类别": "支出", "金额": 80000},
+                {"月份": "2月", "类别": "收入", "金额": 120000},
+                {"月份": "2月", "类别": "支出", "金额": 85000},
+                {"月份": "3月", "类别": "收入", "金额": 115000},
+                {"月份": "3月", "类别": "支出", "金额": 90000},
+                {"月份": "4月", "类别": "收入", "金额": 130000},
+                {"月份": "4月", "类别": "支出", "金额": 88000},
+                {"月份": "5月", "类别": "收入", "金额": 140000},
+                {"月份": "5月", "类别": "支出", "金额": 92000},
+                {"月份": "6月", "类别": "收入", "金额": 155000},
+                {"月份": "6月", "类别": "支出", "金额": 95000},
+            ]
+        },
+        {
+            "name": "income",
+            "type": "inline",
+            "data": [
+                {"月份": "1月", "类别": "收入", "金额": 100000},
+                {"月份": "1月", "类别": "支出", "金额": 80000},
+                {"月份": "2月", "类别": "收入", "金额": 120000},
+                {"月份": "2月", "类别": "支出", "金额": 85000},
+                {"月份": "3月", "类别": "收入", "金额": 115000},
+                {"月份": "3月", "类别": "支出", "金额": 90000},
+                {"月份": "4月", "类别": "收入", "金额": 130000},
+                {"月份": "4月", "类别": "支出", "金额": 88000},
+                {"月份": "5月", "类别": "收入", "金额": 140000},
+                {"月份": "5月", "类别": "支出", "金额": 92000},
+                {"月份": "6月", "类别": "收入", "金额": 155000},
+                {"月份": "6月", "类别": "支出", "金额": 95000},
+            ],
+            "pipeline": [
+                {"op": "filter", "expr": "类别 == '收入'"},
+                {"op": "select", "columns": ["月份", "金额"]},
+                {"op": "rename", "columns": {"金额": "收入"}},
+            ]
+        },
+        {
+            "name": "expense",
+            "type": "inline",
+            "data": [
+                {"月份": "1月", "类别": "收入", "金额": 100000},
+                {"月份": "1月", "类别": "支出", "金额": 80000},
+                {"月份": "2月", "类别": "收入", "金额": 120000},
+                {"月份": "2月", "类别": "支出", "金额": 85000},
+                {"月份": "3月", "类别": "收入", "金额": 115000},
+                {"月份": "3月", "类别": "支出", "金额": 90000},
+                {"月份": "4月", "类别": "收入", "金额": 130000},
+                {"月份": "4月", "类别": "支出", "金额": 88000},
+                {"月份": "5月", "类别": "收入", "金额": 140000},
+                {"月份": "5月", "类别": "支出", "金额": 92000},
+                {"月份": "6月", "类别": "收入", "金额": 155000},
+                {"月份": "6月", "类别": "支出", "金额": 95000},
+            ],
+            "pipeline": [
+                {"op": "filter", "expr": "类别 == '支出'"},
+                {"op": "select", "columns": ["月份", "金额"]},
+                {"op": "rename", "columns": {"金额": "支出"}},
+            ]
+        }
+    ],
     "elements": [
         {"type": "heading", "text": "一、财务总览", "level": 1},
-        {"type": "text", "content": "以下为2024年上半年各月财务数据汇总（Pipeline 处理后）："},
+        {"type": "text", "content": "原始数据通过 pipeline 自动分离为收入和支出两个数据源。"},
         {"type": "spacer", "height": 0.2},
-        {"type": "table", "dataSource": "finance", "style": "financeTable",
-         "columnWidths": [1.2, 1.5, 1.5, 1.5, 1.2]},
+        {"type": "text", "content": "收入明细:", "style": "Heading2"},
+        {"type": "table", "dataSource": "income", "style": "financeTable", "columnWidths": [2, 3]},
+        {"type": "spacer", "height": 0.2},
+        {"type": "text", "content": "支出明细:", "style": "Heading2"},
+        {"type": "table", "dataSource": "expense", "style": "financeTable", "columnWidths": [2, 3]},
         {"type": "pagebreak"},
 
         {"type": "heading", "text": "二、趋势分析", "level": 1},
-        {"type": "text", "content": "2.1 收入与支出趋势"},
+        {"type": "text", "content": "2.1 收入趋势"},
         {
-            "type": "chart", "chartType": "line", "dataSource": "finance",
-            "xAxis": "月份", "yAxis": ["收入", "支出", "利润"],
-            "title": "月度经营趋势", "width": 6.5, "height": 4, "grid": True
-        },
-        {"type": "pagebreak"},
-
-        {"type": "text", "content": "2.2 利润率走势"},
-        {
-            "type": "chart", "chartType": "line", "dataSource": "finance",
-            "xAxis": "月份", "yAxis": "利润率",
-            "title": "月度利润率（%）", "width": 6.5, "height": 3.5, "grid": True
+            "type": "chart", "chartType": "line", "dataSource": "income",
+            "xAxis": "月份", "yAxis": "收入",
+            "title": "月度收入趋势", "width": 6.5, "height": 4, "grid": True
         },
         {"type": "spacer", "height": 0.3},
-        {"type": "text", "content": "2.3 收入结构"},
+        {"type": "text", "content": "2.2 支出趋势"},
         {
-            "type": "chart", "chartType": "bar", "dataSource": "finance",
-            "xAxis": "月份", "yAxis": ["收入", "利润"],
-            "title": "收入与利润对比", "width": 6.5, "height": 3.5, "grid": True
+            "type": "chart", "chartType": "bar", "dataSource": "expense",
+            "xAxis": "月份", "yAxis": "支出",
+            "title": "月度支出对比", "width": 6.5, "height": 3.5, "grid": True
         },
         {"type": "pagebreak"},
 
         {"type": "heading", "text": "三、总结", "level": 1},
-        {"type": "text", "content": "上半年财务表现总结："},
-        {"type": "text", "content": f"• 总收入: ¥{income['收入'].sum():,}"},
-        {"type": "text", "content": f"• 总支出: ¥{income['支出'].sum():,}"},
-        {"type": "text", "content": f"• 总利润: ¥{income['利润'].sum():,}"},
-        {"type": "text", "content": f"• 平均利润率: {income['利润率'].mean():.1f}%"},
-        {"type": "spacer", "height": 0.2},
-        {"type": "text", "content": "整体经营状况良好，利润率稳定在较高水平。建议继续控制成本，提升盈利能力。"},
+        {"type": "text", "content": "所有数据处理均通过 config dataSources 中的 pipeline 完成。"},
+        {"type": "text", "content": "数据源配置示例:"},
+        {"type": "text", "content": '{"name": "income", "type": "inline", "data": [...], "pipeline": [{"op": "filter", ...}]}'},
     ]
 }
 
 generator = PDFReportGenerator(config_dict=config)
-generator.add_data_source("finance", income)
 generator.save("examples/output/26_comprehensive_financial.pdf")
 print("✅ 已生成: examples/output/26_comprehensive_financial.pdf")

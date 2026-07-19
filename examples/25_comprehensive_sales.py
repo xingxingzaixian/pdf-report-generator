@@ -1,25 +1,13 @@
 """
 25 - 综合报告：销售报告（封面+目录+图表+表格+页眉页脚）
 
-演示将多个功能组合成一份完整的专业销售报告。
+使用 config dataSources inline 内联数据，无需 add_data_source。
 """
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import pandas as pd
 from pdf_generator import PDFReportGenerator
-
-sales = pd.DataFrame({
-    "产品": ["笔记本", "台式机", "平板", "手机", "配件"],
-    "Q1": [120, 80, 200, 350, 500],
-    "Q2": [145, 90, 220, 380, 520],
-    "Q3": [160, 95, 250, 400, 550],
-    "Q4": [180, 100, 280, 420, 580],
-    "单价": [5999, 4299, 2999, 3499, 299],
-    "年销量": [605, 365, 950, 1550, 2150],
-    "年销售额": [3629395, 1569135, 2849050, 5418250, 642850],
-})
 
 config = {
     "metadata": {
@@ -58,9 +46,22 @@ config = {
             "alternateRowColor": "#EBF5FB"
         }
     },
+    "dataSources": [
+        {
+            "name": "sales",
+            "type": "inline",
+            "data": [
+                {"产品": "笔记本", "Q1": 120, "Q2": 145, "Q3": 160, "Q4": 180, "单价": 5999, "年销量": 605, "年销售额": 3629395},
+                {"产品": "台式机", "Q1": 80, "Q2": 90, "Q3": 95, "Q4": 100, "单价": 4299, "年销量": 365, "年销售额": 1569135},
+                {"产品": "平板", "Q1": 200, "Q2": 220, "Q3": 250, "Q4": 280, "单价": 2999, "年销量": 950, "年销售额": 2849050},
+                {"产品": "手机", "Q1": 350, "Q2": 380, "Q3": 400, "Q4": 420, "单价": 3499, "年销量": 1550, "年销售额": 5418250},
+                {"产品": "配件", "Q1": 500, "Q2": 520, "Q3": 550, "Q4": 580, "单价": 299, "年销量": 2150, "年销售额": 642850},
+            ]
+        }
+    ],
     "elements": [
         {"type": "heading", "text": "一、销售总览", "level": 1},
-        {"type": "text", "content": "2024年度各产品线销售数据汇总如下："},
+        {"type": "text", "content": "2024年度各产品线销售数据汇总（数据通过 config dataSources inline 加载）："},
         {"type": "spacer", "height": 0.2},
         {"type": "table", "dataSource": "sales", "style": "salesTable",
          "columnWidths": [1.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.2]},
@@ -76,14 +77,7 @@ config = {
         {"type": "pagebreak"},
 
         {"type": "heading", "text": "三、销售额分析", "level": 1},
-        {"type": "text", "content": "3.1 各产品年销售额占比"},
-        {
-            "type": "chart", "chartType": "pie", "dataSource": "sales",
-            "xAxis": "产品", "yAxis": "年销售额",
-            "title": "年销售额占比", "width": 6, "height": 4.5
-        },
-        {"type": "spacer", "height": 0.3},
-        {"type": "text", "content": "3.2 产品销量与销售额对比"},
+        {"type": "text", "content": "3.1 各产品年销售额"},
         {
             "type": "chart", "chartType": "bar", "dataSource": "sales",
             "xAxis": "产品", "yAxis": "年销售额",
@@ -92,16 +86,14 @@ config = {
         {"type": "pagebreak"},
 
         {"type": "heading", "text": "四、结论与建议", "level": 1},
-        {"type": "text", "content": "根据以上数据分析："},
         {"type": "text", "content": "1. 手机和配件产品线销量领先，贡献了最大的市场份额。"},
         {"type": "text", "content": "2. 笔记本虽然销量不及移动产品，但因单价高，销售额可观。"},
-        {"type": "text", "content": "3. 建议下一年度加大对移动产品线的投入，同时优化台式机产品定位。"},
+        {"type": "text", "content": "3. 建议下一年度加大对移动产品线的投入。"},
         {"type": "spacer", "height": 0.3},
-        {"type": "text", "content": "报告生成日期：{{date}}", "style": "Normal"},
+        {"type": "text", "content": "报告生成日期：{{date}}"},
     ]
 }
 
 generator = PDFReportGenerator(config_dict=config)
-generator.add_data_source("sales", sales)
 generator.save("examples/output/25_comprehensive_sales.pdf")
 print("✅ 已生成: examples/output/25_comprehensive_sales.pdf")

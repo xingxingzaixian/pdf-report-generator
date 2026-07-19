@@ -180,12 +180,17 @@ class ChartGenerator:
             ax.grid(alpha=0.3)
     
     def _create_pie_chart(self, ax, data: pd.DataFrame, config: Dict[str, Any]):
-        """创建饼图"""
-        labels_col = config.get('labels')
-        values_col = config.get('values')
+        """创建饼图
+        
+        支持两种配置方式：
+        1. labels + values（推荐）
+        2. xAxis + yAxis（兼容柱状图/折线图配置方式）
+        """
+        labels_col = config.get('labels') or config.get('xAxis')
+        values_col = config.get('values') or config.get('yAxis')
         
         if not labels_col or not values_col:
-            raise ValueError("Pie chart requires 'labels' and 'values' in config")
+            raise ValueError("Pie chart requires 'labels'/'xAxis' and 'values'/'yAxis' in config")
         
         labels = data[labels_col]
         values = data[values_col]

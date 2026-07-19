@@ -60,14 +60,18 @@ config = {
         },
         {"type": "pagebreak"},
 
-        # 饼图
+        # 饼图 — 使用 labels + values（推荐）
         {"type": "text", "content": "3. 饼图 - 成本构成", "style": "Heading2"},
+        {"type": "text", "content": "使用 labels + values 配置（也支持 xAxis + yAxis）"},
         {
             "type": "chart",
             "chartType": "pie",
             "dataSource": "cost",
-            "xAxis": "类别",
-            "yAxis": "金额",
+            "labels": "类别",
+            "values": "金额",
+            # 也支持 xAxis/yAxis 作为别名：
+            # "xAxis": "类别",
+            # "yAxis": "金额",
             "title": "年度成本构成",
             "width": 6,
             "height": 4.5,

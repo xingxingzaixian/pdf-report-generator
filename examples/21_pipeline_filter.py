@@ -1,64 +1,103 @@
 """
 21 - Pipeline 过滤与排序：filter + sort + limit
 
-演示使用 PipelineEngine 对数据进行预处理。
+演示两种使用方式：
+1. config dataSources 中直接配置 pipeline（推荐）
+2. 独立 PipelineEngine API 编程调用
+
+Pipeline 操作的数据都是 pd.DataFrame，因为系统内部统一使用 DataFrame。
 """
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import pandas as pd
 from pdf_generator import PDFReportGenerator
-from pdf_generator.pipeline import PipelineEngine
 
-raw = pd.DataFrame({
-    "产品": ["笔记本", "台式机", "平板", "手机", "配件", "显示器", "键盘", "鼠标"],
-    "Q1": [120, 80, 200, 350, 500, 300, 600, 800],
-    "Q2": [145, 90, 220, 380, 520, 320, 620, 820],
-    "价格": [5999, 4299, 2999, 3499, 299, 1999, 199, 99],
-})
-
-engine = PipelineEngine()
-
-# 方式1: filter + sort
-filtered = engine.execute(
-    pipeline=[
-        {"op": "filter", "expr": "Q1 > 200"},
-        {"op": "sort", "by": "Q1", "order": "desc"},
-    ],
-    df=raw
-)
-
+# ============================================================
+# 方式1: config 中内嵌 pipeline（推荐 — 无需额外代码）
+# ============================================================
 config1 = {
-    "metadata": {"title": "Pipeline - 过滤与排序"},
+    "metadata": {"title": "Pipeline 内嵌 - filter + sort"},
+    "dataSources": [
+        {
+            "name": "filtered",
+            "type": "inline",
+            "data": [
+                {"产品": "笔记本", "Q1": 120, "Q2": 145, "价格": 5999},
+                {"产品": "台式机", "Q1": 80, "Q2": 90, "价格": 4299},
+                {"产品": "平板", "Q1": 200, "Q2": 220, "价格": 2999},
+                {"产品": "手机", "Q1": 350, "Q2": 380, "价格": 3499},
+                {"产品": "配件", "Q1": 500, "Q2": 520, "价格": 299},
+            ],
+            "pipeline": [
+                {"op": "filter", "expr": "Q1 > 150"},         # 只保留 Q1 > 150
+                {"op": "sort", "by": "Q1", "order": "desc"},   # 按 Q1 降序
+            ]
+        }
+    ],
     "elements": [
-        {"type": "text", "content": "过滤与排序结果", "style": "Title"},
-        {"type": "text", "content": "管道: filter Q1>200 → sort Q1 desc"},
+        {"type": "text", "content": "filter + sort 结果", "style": "Title"},
+        {"type": "text", "content": "管道步骤（在 config 中配置）:"},
+        {"type": "text", "content": '1. filter: Q1 > 150'},
+        {"type": "text", "content": '2. sort: by=Q1, order=desc'},
         {"type": "spacer", "height": 0.2},
-        {"type": "table", "dataSource": "d", "style": "Normal"},
+        {"type": "table", "dataSource": "filtered", "style": "Normal"},
     ]
 }
+
 gen1 = PDFReportGenerator(config_dict=config1)
-gen1.add_data_source("d", filtered)
 gen1.save("examples/output/21_pipeline_filter_a.pdf")
 print("✅ 已生成: examples/output/21_pipeline_filter_a.pdf")
 
-# 方式2: limit Top N
-top3 = engine.execute(
-    pipeline=[{"op": "sort", "by": "Q2", "order": "desc"}, {"op": "limit", "n": 3}],
-    df=raw
-)
 
+# ============================================================
+# 方式2: 独立 PipelineEngine API 编程调用
+# ============================================================
+# from pdf_generator.pipeline import PipelineEngine
+# import pandas as pd
+#
+# engine = PipelineEngine()
+# raw = pd.DataFrame({...})
+# result = engine.execute(
+#     pipeline=[
+#         {"op": "filter", "expr": "Q1 > 150"},
+#         {"op": "sort", "by": "Q1", "order": "desc"},
+#     ],
+#     df=raw  # 传入 DataFrame
+# )
+# generator.add_data_source("filtered", result)
+
+# ============================================================
+# 方式3: limit 取 Top N（在 config 中内嵌 pipeline）
+# ============================================================
 config2 = {
     "metadata": {"title": "Pipeline - Top 3"},
+    "dataSources": [
+        {
+            "name": "top3",
+            "type": "inline",
+            "data": [
+                {"产品": "鼠标", "Q2": 820},
+                {"产品": "键盘", "Q2": 620},
+                {"产品": "配件", "Q2": 520},
+                {"产品": "手机", "Q2": 380},
+                {"产品": "显示器", "Q2": 320},
+                {"产品": "平板", "Q2": 220},
+            ],
+            "pipeline": [
+                {"op": "sort", "by": "Q2", "order": "desc"},
+                {"op": "limit", "n": 3},
+            ]
+        }
+    ],
     "elements": [
         {"type": "text", "content": "Q2销量 Top 3", "style": "Title"},
         {"type": "text", "content": "管道: sort Q2 desc → limit n=3"},
         {"type": "spacer", "height": 0.2},
-        {"type": "table", "dataSource": "d", "style": "Normal"},
+        {"type": "table", "dataSource": "top3", "style": "Normal"},
     ]
 }
+
 gen2 = PDFReportGenerator(config_dict=config2)
-gen2.add_data_source("d", top3)
 gen2.save("examples/output/21_pipeline_filter_b.pdf")
 print("✅ 已生成: examples/output/21_pipeline_filter_b.pdf")
