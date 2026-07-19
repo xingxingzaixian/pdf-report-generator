@@ -119,9 +119,37 @@ class ElementFactory:
         # 获取自动换行配置
         wrap_columns = config.get('wrapColumns', [])  # 指定需要换行的列索引
         wrap_threshold = config.get('wrapThreshold', 50)  # 超过此长度自动换行
+        # 当设置了列宽时，默认对所有列自动换行，防止内容溢出到相邻列
+        wrap_all = config.get('wrapAllColumns', False)
+        
+        # 列宽（需要在处理数据之前获取）
+        column_widths = config.get('columnWidths')
+        if column_widths:
+            column_widths = [w * inch if isinstance(w, (int, float)) else w for w in column_widths]
+        
+        # 如果设置了列宽且未显式禁用，自动对所有数据列启用换行
+        has_column_widths = bool(column_widths)
         
         # 创建单元格样式（用于Paragraph）
         cell_style = self.style_manager.get_style('BodyText')
+        
+        def _should_wrap(col_idx: int, val_str: str) -> bool:
+            """判断单元格是否需要使用 Paragraph 包装以实现自动换行"""
+            if wrap_all:
+                return True
+            if col_idx in wrap_columns:
+                return True
+            if len(val_str) > wrap_threshold:
+                return True
+            # 如果设置了列宽，检查文本是否会超出列宽（粗略估算）
+            if has_column_widths and column_widths and col_idx < len(column_widths):
+                # 粗略估算：中文字符约7pt，英文约4pt，取5pt平均值
+                # 列宽 - 内边距(12pt) 为可用宽度
+                available_width = column_widths[col_idx] - 12
+                estimated_width = len(val_str) * 5  # 5pt per character average
+                if estimated_width > available_width:
+                    return True
+            return False
         
         # 方式1: 直接提供数据
         if 'data' in config:
@@ -133,8 +161,7 @@ class ElementFactory:
                 row_data = []
                 for col_idx, val in enumerate(row):
                     val_str = str(val)
-                    # 判断是否需要自动换行
-                    if col_idx in wrap_columns or len(val_str) > wrap_threshold:
+                    if _should_wrap(col_idx, val_str):
                         row_data.append(Paragraph(val_str, cell_style))
                     else:
                         row_data.append(val_str)
@@ -161,10 +188,7 @@ class ElementFactory:
                 row_data = []
                 for col_idx, val in enumerate(row.values):
                     val_str = str(val)
-                    # 判断是否需要自动换行
-                    # 1. 在wrapColumns列表中
-                    # 2. 超过wrapThreshold长度阈值
-                    if col_idx in wrap_columns or len(val_str) > wrap_threshold:
+                    if _should_wrap(col_idx, val_str):
                         # 使用Paragraph实现自动换行
                         row_data.append(Paragraph(val_str, cell_style))
                     else:
@@ -172,11 +196,6 @@ class ElementFactory:
                 table_data.append(row_data)
         else:
             raise ValueError("Table element requires either 'dataSource' or 'data'")
-        
-        # 列宽
-        column_widths = config.get('columnWidths')
-        if column_widths:
-            column_widths = [w * inch if isinstance(w, (int, float)) else w for w in column_widths]
         
         # 行高
         row_heights = config.get('rowHeights')

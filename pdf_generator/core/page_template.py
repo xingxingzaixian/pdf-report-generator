@@ -8,7 +8,12 @@ from pdf_generator.core.header_footer import HeaderFooterHandler
 
 
 class NumberedCanvas(canvas.Canvas):
-    """带页码的自定义Canvas"""
+    """带页码的自定义Canvas
+    
+    覆盖 getPageNumber() 以支持 startPage 功能：
+    当 footer 配置了 startPage 时，返回调整后的显示页码，
+    确保 TOC 目录中的页码与页脚显示页码一致。
+    """
     
     def __init__(self, *args, **kwargs):
         # 提取自定义参数
@@ -16,6 +21,20 @@ class NumberedCanvas(canvas.Canvas):
         
         canvas.Canvas.__init__(self, *args, **kwargs)
         self._saved_page_states = []
+        
+        # 获取页脚起始页码偏移量（用于 TOC 页码调整）
+        self._page_number_offset = 0
+        if self.header_footer_handler:
+            self._page_number_offset = 1 - self.header_footer_handler.footer_start_page
+    
+    def getPageNumber(self):
+        """获取当前页码（已根据 footer.startPage 调整）
+        
+        ReportLab 的 TableOfContents 在渲染目录时调用此方法获取页码。
+        通过覆盖此方法，确保目录中的页码与页脚显示的页码一致。
+        """
+        raw_page = canvas.Canvas.getPageNumber(self)
+        return max(1, raw_page + self._page_number_offset)
     
     def showPage(self):
         """保存页面状态"""
