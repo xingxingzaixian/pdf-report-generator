@@ -25,6 +25,36 @@
 }
 ```
 
+## 起始页码
+
+通过 `startPage` 参数可以控制页眉/页脚从第几页开始显示。这在封面页、目录页等不需要页眉页脚的场景非常有用。
+
+```json
+{
+  "pageTemplate": {
+    "header": {
+      "enabled": true,
+      "startPage": 3,
+      "left": {"type": "text", "content": "报告标题"}
+    },
+    "footer": {
+      "enabled": true,
+      "startPage": 2,
+      "center": {
+        "type": "pageNumber",
+        "format": "{page}/{total}"
+      }
+    }
+  }
+}
+```
+
+上述配置中：
+- 页眉从第 3 页开始显示（前两页无页眉）
+- 页脚从第 2 页开始显示（仅第 1 页无页脚）
+
+`startPage` 默认值为 `1`（从第一页开始显示），必须为正整数。
+
 ## 三栏布局
 
 ```json

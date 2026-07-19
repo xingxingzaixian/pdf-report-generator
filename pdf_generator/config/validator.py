@@ -326,6 +326,14 @@ class ConfigValidator:
             self.errors.append(f"{section_name} must be a dictionary")
             return
         
+        # 验证 startPage（起始页码，必须为正整数）
+        if 'startPage' in section:
+            start_page = section['startPage']
+            if not isinstance(start_page, int) or start_page < 1:
+                self.errors.append(
+                    f"{section_name}.startPage must be a positive integer (>= 1)"
+                )
+        
         # 验证左中右区域
         for position in ['left', 'center', 'right']:
             if position in section:

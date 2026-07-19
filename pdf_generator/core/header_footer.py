@@ -33,6 +33,10 @@ class HeaderFooterHandler:
         # 默认高度（英寸）
         self.header_height = self.header_config.get('height', 0.8) * inch
         self.footer_height = self.footer_config.get('height', 0.6) * inch
+        
+        # 起始页码：从第几页开始显示页眉/页脚（默认第1页）
+        self.header_start_page = self.header_config.get('startPage', 1)
+        self.footer_start_page = self.footer_config.get('startPage', 1)
     
     def has_header(self) -> bool:
         """是否启用页眉"""
@@ -55,11 +59,18 @@ class HeaderFooterHandler:
         
         Args:
             canvas_obj: Canvas对象
-            page_num: 当前页码
+            page_num: 当前物理页码（从1开始）
             total_pages: 总页数
         """
         if not self.has_header():
             return
+        
+        # 检查是否已达到起始页码
+        if page_num < self.header_start_page:
+            return
+        
+        # 计算显示页码（从 startPage 开始重新编号为1）
+        display_page_num = page_num - self.header_start_page + 1
         
         page_width, page_height = canvas_obj._pagesize
         y_position = page_height - self.header_height / 2
@@ -71,7 +82,7 @@ class HeaderFooterHandler:
             'left', 
             y_position, 
             page_width,
-            page_num,
+            display_page_num,
             total_pages
         )
         
@@ -81,7 +92,7 @@ class HeaderFooterHandler:
             'center', 
             y_position, 
             page_width,
-            page_num,
+            display_page_num,
             total_pages
         )
         
@@ -91,7 +102,7 @@ class HeaderFooterHandler:
             'right', 
             y_position, 
             page_width,
-            page_num,
+            display_page_num,
             total_pages
         )
         
@@ -104,11 +115,18 @@ class HeaderFooterHandler:
         
         Args:
             canvas_obj: Canvas对象
-            page_num: 当前页码
+            page_num: 当前物理页码（从1开始）
             total_pages: 总页数
         """
         if not self.has_footer():
             return
+        
+        # 检查是否已达到起始页码
+        if page_num < self.footer_start_page:
+            return
+        
+        # 计算显示页码（从 startPage 开始重新编号为1）
+        display_page_num = page_num - self.footer_start_page + 1
         
         page_width, _ = canvas_obj._pagesize
         y_position = self.footer_height / 2
@@ -120,7 +138,7 @@ class HeaderFooterHandler:
             'left', 
             y_position, 
             page_width,
-            page_num,
+            display_page_num,
             total_pages
         )
         
@@ -130,7 +148,7 @@ class HeaderFooterHandler:
             'center', 
             y_position, 
             page_width,
-            page_num,
+            display_page_num,
             total_pages
         )
         
@@ -140,7 +158,7 @@ class HeaderFooterHandler:
             'right', 
             y_position, 
             page_width,
-            page_num,
+            display_page_num,
             total_pages
         )
         
